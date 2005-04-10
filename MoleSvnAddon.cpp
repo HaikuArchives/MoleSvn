@@ -40,7 +40,7 @@ void MoleSvnAddon::ShowMenu(BPoint point)
 	app_info appInfo; 
 	BAppFileInfo appFileInfo; 
 	be_app->GetAppInfo(&appInfo); 
-
+/*
 	image_id image = find_image(memAddr);
 	image_info info;
 	if (get_image_info(image, &info) == B_OK) {
@@ -48,7 +48,7 @@ void MoleSvnAddon::ShowMenu(BPoint point)
 		BFile file(&info.name[0], B_READ_ONLY);
 #else
 		BString name(&info.name[0]);
-
+*/
 	BFile file; 
 	//file.SetTo(&appInfo.ref, B_READ_WRITE); 
 	file.SetTo("MoleSVN-M", B_READ_WRITE); 
@@ -63,12 +63,13 @@ void MoleSvnAddon::ShowMenu(BPoint point)
 		throw FileNotFound(string("cannot open ressources"));	
 	}
 	
-	
+/*
 	size_t len;
 	const void *data = res.LoadResource('ICON', "MOLESVN:L:LOGO", &len);	
 	BBitmap logo(BRect(0, 0, 31, 31), B_RGB32);
 	logo.SetBits(data);
-		
+*/
+
 	// Create the menu
 	BPopUpMenu menu("menu");
 	menu.AddItem(new BMenuItem("toto", NULL));
