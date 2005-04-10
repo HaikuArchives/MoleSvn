@@ -8,12 +8,13 @@
 #ifndef __IconMenuItem_h__
 #define __IconMenuItem_h__
 
-#include <InterfaceKit.h>
+#include "MenuItem.h"
+#include "MoleSvnIcons.h"
 
-class IconMenuItem : public BMenuItem
+class IconMenuItem : public MenuItem
 {
 public:
-	IconMenuItem(const char* strLabel, const BBitmap& rIcon);
+	IconMenuItem(const char* strLabel, MenuItemCommand cmd, MoleSvnIcons iconId);
 		// Description : contructor
 		
 	virtual ~IconMenuItem();

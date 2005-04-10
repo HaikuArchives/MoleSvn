@@ -7,16 +7,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "IconMenuItem.h"
+#include "../MoleSvnAddon.h"
 
-IconMenuItem::IconMenuItem(const char* strLabel, const BBitmap& rIcon)
-:BMenuItem(strLabel, NULL), m_pIcon(NULL)
+IconMenuItem::IconMenuItem(const char* strLabel, MenuItemCommand cmd, MoleSvnIcons iconId)
+:MenuItem(strLabel, cmd), m_pIcon(NULL)
 {
-	m_pIcon = new BBitmap(rIcon);
-	if(!m_pIcon->IsValid())
-	{
-		delete m_pIcon;
-		m_pIcon = NULL;
-	}
+	MoleSvnAddon::GetInstance()->GetResources()->LoadIcon('MICN', iconId, &m_pIcon);
 }
 		
 IconMenuItem::~IconMenuItem()

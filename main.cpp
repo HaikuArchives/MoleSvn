@@ -35,11 +35,12 @@ void process_refs(entry_ref dir_ref, BMessage *msg, void *)
 			lstEntry.push_back(file_ref);
 		}
 
-		// Create the instance of the addon
-		MoleSvnAddon MyAddon(dir_ref, lstEntry);
+		// Set parameters to the instance of the addon
+		MoleSvnAddon::GetInstance()->SetParameters(dir_ref, lstEntry);
 	
 		// Retrieve mouse position
 		// I don't know a much safer method...
+		// Create a fake window and an embedded view, to get mouse position... yep
 		BWindow* pWindow = new BWindow(BRect(0, 0, 100, 100), "MoleSVN", B_TITLED_WINDOW, B_NO_WORKSPACE_ACTIVATION);
 		BView* pView = new BView(BRect(0, 0, 100, 100), "MoleSVN", B_FOLLOW_H_CENTER, B_WILL_DRAW);
 		pWindow->AddChild(pView);
@@ -53,7 +54,7 @@ void process_refs(entry_ref dir_ref, BMessage *msg, void *)
 		TRACE_OBJECT ((CC_APPLICATION, CR_OBJECT, &MousePosition, "Mouse position"));
 	
 		// Show the menu, depending of the selected files 
-		MyAddon.ShowMenu(MousePosition);
+		MoleSvnAddon::GetInstance()->ShowMenu(MousePosition);
 	}
 	catch(MoleSvnException e)
 	{

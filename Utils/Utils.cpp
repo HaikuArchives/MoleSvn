@@ -9,7 +9,7 @@
 #include "Utils.h"
 
 #include <InterfaceKit.h>
-#include <stdio.h>
+
 #include "../Config.h"
 
 void ShowAboutWindow() 
@@ -23,4 +23,15 @@ void ShowAboutWindow()
 				0,
 				B_WIDTH_AS_USUAL,
 				B_INFO_ALERT))->Go();
+}
+
+std::string FormatString(const char* pBuffer, ...)
+{
+    va_list argList;
+    const int nMax = 1024;
+    char caBuffer[nMax];
+    va_start(argList, pBuffer);
+    vsprintf(caBuffer, pBuffer, argList);
+    va_end(argList);
+    return std::string(caBuffer);
 }

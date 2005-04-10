@@ -10,6 +10,8 @@
 
 #include <string>
 #include <stdexcept>
+#include "Utils.h"
+#include "../UI/MoleSvnIcons.h"
 
 // Description : based class for all molesvn exceptions 
 class MoleSvnException : public std::runtime_error
@@ -19,11 +21,37 @@ public:
 	:std::runtime_error(strMessage){};
 };
 
+///////////////////////////////////////////////////////////////////////////////
+// -- Resource
+///////////////////////////////////////////////////////////////////////////////
+// Description : exception when a resource doesn't exit
+class ResourceNotFoundException : public MoleSvnException
+{
+public:
+	ResourceNotFoundException(MoleSvnIcons iconId):MoleSvnException(FormatString("resource id (%d) doesn't identify an existing image", iconId)){};
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// -- Memory
+///////////////////////////////////////////////////////////////////////////////
+
+// Description : exception when a file doesn't exit
+class ImageException : public MoleSvnException
+{
+public:
+	ImageException(image_id id):MoleSvnException(FormatString("%d doesn't identify an existing image", id)){};
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+// -- File
+///////////////////////////////////////////////////////////////////////////////
+
 // Description : exception when a file doesn't exit
 class FileNotFound : public MoleSvnException
 {
 public:
-	FileNotFound(const std::string& strMsg):MoleSvnException(strMsg){};
+	FileNotFound(const std::string& strMsg):MoleSvnException(string("file not found : ") + strMsg){};
 };
 
 #endif //__Exception_h__
