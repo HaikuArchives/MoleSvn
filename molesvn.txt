@@ -1,0 +1,28 @@
+Package:
+*** Utils ***
+- Logger
+
+- Utils
+
+*** Application ***
+- main
+
+*** UI ***
+
+*** Parser ***
+
+*** SVN ***
+
+
+
+Release
+v0.1:
+- Affichage d'un menu
+	- add
+	- checkout
+	- commit
+	- update
+	- status
+- Affichage de messages SVN
+
+v0.2:
