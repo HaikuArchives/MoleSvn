@@ -8,6 +8,13 @@
 #ifndef __Config_h__
 #define __Config_h__
 
+#define _ZETA_USING_DEPRECATED_API_ 1
+
+#include <AppKit.h>
+#include <InterfaceKit.h>
+#include <SupportKit.h>
+#include <StorageKit.h>
+
 #define CLUE	// define it for debug session with clue tool
 #include "Utils/Clue.h"
 

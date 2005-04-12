@@ -7,9 +7,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "Utils.h"
-
-#include <InterfaceKit.h>
-
 #include "../Config.h"
 
 void ShowAboutWindow() 

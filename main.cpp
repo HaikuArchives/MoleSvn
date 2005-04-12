@@ -5,9 +5,6 @@
 // Description : defines the entry point of the add-on 
 // Author      : cedric.bresson@artcoder.com
 ///////////////////////////////////////////////////////////////////////////////
-#include <Application.h> 
-#include <InterfaceKit.h> 
-#include <StorageKit.h> 
 
 #include <stdio.h> 
 #include <string.h> 
@@ -16,7 +13,6 @@
 #include <be/add-ons/tracker/TrackerAddon.h>
 #include "Config.h"
 #include "MoleSvnAddon.h"
-
 
 using namespace std;
 

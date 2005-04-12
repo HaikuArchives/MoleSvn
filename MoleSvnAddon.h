@@ -8,8 +8,6 @@
 #ifndef __MoleSvnAddon_h__
 #define __MoleSvnAddon_h__
 
-#include <KernelKit.h>
-#include <StorageKit.h> 
 #include <list>
 #include "Config.h"
 #include "Utils/MoleSvnResources.h"

@@ -10,6 +10,8 @@
 
 #include <string>
 #include <stdexcept>
+
+#include "../Config.h"
 #include "Utils.h"
 #include "../UI/MoleSvnIcons.h"
 

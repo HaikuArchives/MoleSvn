@@ -12,6 +12,7 @@
 #include <stdarg.h>
 #include <string>
 
+
 void ShowAboutWindow();
 	// Description : show an about window with different informations (version, ...)
 

@@ -8,7 +8,7 @@
 #ifndef __MoleSvnResources_h__
 #define __MoleSvnResources_h__
 
-#include <StorageKit.h>
+#include "../Config.h"
 #include "../UI/MoleSvnIcons.h"
 
 class MoleSvnResources

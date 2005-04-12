@@ -12,11 +12,13 @@
 IconMenuItem::IconMenuItem(const char* strLabel, MenuItemCommand cmd, MoleSvnIcons iconId)
 :MenuItem(strLabel, cmd), m_pIcon(NULL)
 {
+	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 	MoleSvnAddon::GetInstance()->GetResources()->LoadIcon('MICN', iconId, &m_pIcon);
 }
 		
 IconMenuItem::~IconMenuItem()
 {
+	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 	if(m_pIcon)
 	{
 		delete m_pIcon;

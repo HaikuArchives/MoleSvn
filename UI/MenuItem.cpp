@@ -11,11 +11,17 @@
 MenuItem::MenuItem(const char* strLabel, MenuItemCommand cmd)
 :BMenuItem(strLabel, NULL), m_Command(cmd)
 {
-	// Empty
+	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
+
 }
 		
 MenuItem::~MenuItem()
 {
+	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 
 }
 		
+MenuItemCommand MenuItem::GetCommand() const
+{
+	return m_Command;
+}

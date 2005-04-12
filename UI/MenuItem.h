@@ -8,7 +8,7 @@
 #ifndef __MenuItem_h__
 #define __MenuItem_h__
 
-#include <InterfaceKit.h>
+#include "../Config.h"
 
 enum MenuItemCommand
 {
@@ -28,6 +28,8 @@ public:
 	virtual ~MenuItem();
 		// Description : destructor
 		
+	MenuItemCommand GetCommand() const;
+		// Description: return the command of the menu item
 private:
 	MenuItemCommand m_Command;
 		// Description : svn commant for this menu item

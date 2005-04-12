@@ -10,11 +10,10 @@
 #include "Exception.h"
 #include "../MoleSvnAddon.h"
 
-#include <InterfaceKit.h>
-
 MoleSvnResources::MoleSvnResources(BFile* pFile)
 :m_pResources(NULL)
 {
+	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 	m_pResources = new BResources();
 	if( m_pResources->SetTo(pFile) != B_OK)
 	{
@@ -26,6 +25,7 @@ MoleSvnResources::MoleSvnResources(BFile* pFile)
 		
 MoleSvnResources::~MoleSvnResources()
 {
+	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 	if(m_pResources)
 	{
 		delete m_pResources;
@@ -37,6 +37,7 @@ MoleSvnResources::~MoleSvnResources()
 ///////////////////////////////////////////////////////////////////////////
 void MoleSvnResources::LoadIcon(type_code type, MoleSvnIcons iconId, BBitmap** pDest)
 {
+	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 	// Check if the resource exits
 	if(!m_pResources->HasResource(type, iconId))
 	{

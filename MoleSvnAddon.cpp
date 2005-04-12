@@ -7,13 +7,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "MoleSvnAddon.h"
 
-#include <AppKit.h>
-#include <InterfaceKit.h>
-#include <SupportKit.h>
-
 #include "UI/MoleSvnIcons.h"
 #include "UI/MenuItem.h"
 #include "UI/IconMenuItem.h"
+#include "UI/ResultsWindow.h"
+
+#include <string>
+
+using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
 // -- Life-cycle
@@ -93,7 +94,23 @@ void MoleSvnAddon::ShowMenu(BPoint point)
 	
 	// Show the popup menu
 	TRACE_OBJECT ((CC_APPLICATION, CR_OBJECT, &point, "Popup menu point"));
-	BMenuItem* pSelectedItem = menu.Go(point, false, true);
+	MenuItem* pSelectedItem = reinterpret_cast<MenuItem *>(menu.Go(point, false, true));
+	if(pSelectedItem->GetCommand() == C_Update)
+	{
+/*	
+		ResultsWindow* pWindow = new ResultsWindow(BRect(10, 10, 400, 300), string("Update"));
+		pWindow->Show();
+
+		// Wait until the window thread terminates. If we don't do this,
+		// our add-on might crash mysteriously, taking the Tracker with
+		// it. See also "Be Newsletter Volume II Issue 10".
+
+		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "avant wait"));
+		int32 exitValue;
+		wait_for_thread(pWindow->Thread(), &exitValue);
+		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "apres wait"));
+*/		
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////

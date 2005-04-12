@@ -10,6 +10,7 @@
 
 #include "MenuItem.h"
 #include "MoleSvnIcons.h"
+#include "../Config.h"
 
 class IconMenuItem : public MenuItem
 {
