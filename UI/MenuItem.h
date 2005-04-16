@@ -16,6 +16,7 @@ enum MenuItemCommand
 	C_Add,
 	C_Update,
 	C_Commit,
+	C_Status,
 	C_About,
 };
 

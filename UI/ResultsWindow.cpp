@@ -46,14 +46,14 @@ void ResultsWindow::MessageReceived(BMessage *message)
 			break;
 	}
 }
-
+/*
 bool ResultsWindow::QuitRequested()
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
-	be_app_messenger.SendMessage(B_QUIT_REQUESTED);
+	//be_app_messenger.SendMessage(B_QUIT_REQUESTED);
 	return true;
 }
-
+*/
 ///////////////////////////////////////////////////////////////////////////////
 // -- ResultsView
 ///////////////////////////////////////////////////////////////////////////////
@@ -64,14 +64,46 @@ ResultsView::ResultsView(BRect frame)
 	   B_FRAME_EVENTS | B_FULL_UPDATE_ON_RESIZE)
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
+	
+	// ListView
+	BRect ListViewRect(g_fSpaceToWindowBorder,
+	                   g_fSpaceToWindowBorder,
+	                   frame.Width() - (g_fSpaceToWindowBorder + B_V_SCROLL_BAR_WIDTH),
+	                   frame.Height() - (g_fSpaceToWindowBorder + g_fButtonHeight + g_fSpaceToWindowBorder + B_H_SCROLL_BAR_HEIGHT) );
+	BListView* pListView = new BListView(ListViewRect, 
+	                                     "ResultWindow_ListView",
+	                                     B_SINGLE_SELECTION_LIST,
+	                                     B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP_BOTTOM,
+	                                     B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS | B_FULL_UPDATE_ON_RESIZE);
+	pListView->AddItem(new BStringItem("Toto"));
+	pListView->AddItem(new BStringItem("Titi"));
+	AddChild(new BScrollView("ResultWindows_ScrollView", 
+	                         pListView,
+	                         B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP_BOTTOM,
+	                         B_FRAME_EVENTS | B_FULL_UPDATE_ON_RESIZE,
+	                         true,
+	                         true));
 
-	BMessage msgOk(MSG_Ok);
-	BButton *pOk = new BButton(BRect(/*frame.Width() -*/ 50, /*frame.Height() -*/ 50, 50+80, 50+30),
-							   "ResultsWindow_Ok", 
-	                           "Ok",
-	                           &msgOk);
-	                          
-	AddChild(pOk);
+	// Ok button
+	float fButtonX = frame.IntegerWidth() - (g_fButtonWidth + g_fSpaceToWindowBorder);
+	float fButtonY = frame.IntegerHeight() - (g_fButtonHeight + g_fSpaceToWindowBorder);
+	m_pOk = new BButton(BRect(fButtonX, fButtonY, fButtonX + g_fButtonWidth, fButtonY + g_fButtonHeight),
+		    				  "ResultsWindow_Ok", 
+	                          "Ok",
+	                          new BMessage(MSG_Ok),
+	                          B_FOLLOW_RIGHT | B_FOLLOW_BOTTOM);
+	m_pOk->MakeDefault(true);
+	AddChild(m_pOk);
+
+	// Cancel button
+	fButtonX -= g_fButtonWidth + g_fButtonsSpace;
+	m_pCancel = new BButton(BRect(fButtonX, fButtonY, fButtonX + g_fButtonWidth, fButtonY + g_fButtonHeight),
+		    				  "ResultsWindow_Cancel", 
+	                          "Cancel",
+	                          new BMessage(MSG_Cancel),
+	                          B_FOLLOW_RIGHT | B_FOLLOW_BOTTOM);
+	m_pCancel->SetEnabled(false);
+	AddChild(m_pCancel);
 }
 	
 ResultsView::~ResultsView()
@@ -79,9 +111,4 @@ ResultsView::~ResultsView()
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 
 }
-	
-void ResultsView::FrameResized(float width, float height)
-{
-	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
-	BView::FrameResized(width, height);
-}
+

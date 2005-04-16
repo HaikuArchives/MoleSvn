@@ -48,35 +48,23 @@ void process_refs(entry_ref dir_ref, BMessage *msg, void *)
 		MousePosition.x -= 10;
 		MousePosition.y -= 10;
 		TRACE_OBJECT ((CC_APPLICATION, CR_OBJECT, &MousePosition, "Mouse position"));
-	
+		
 		// Show the menu, depending of the selected files 
 		MoleSvnAddon::GetInstance()->ShowMenu(MousePosition);
 	}
 	catch(MoleSvnException e)
 	{
-		(new BAlert(0, 
-					(string("Error : \n\n") + string(e.what())).c_str(),
-					"Okay",
-					0,
-					0,
-					B_WIDTH_AS_USUAL,
-					B_STOP_ALERT))->Go();
+		ShowErrorWindow(e.what());
 	}
 	catch(...)
 	{
-		(new BAlert(0, 
-					"Error : \n\nunhandled exception",
-					"Okay",
-					0,
-					0,
-					B_WIDTH_AS_USUAL,
-					B_STOP_ALERT))->Go();
+		ShowErrorWindow(string("unhandled exception"));
 	}
 } 
 
 int main() 
 { 
-	new BApplication("application/x-artcoder-add-on"); 
+	new BApplication("application/x-molesvn-add-on"); 
 	
 	// Show a tiny message ;)
 	ShowAboutWindow();

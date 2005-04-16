@@ -19,14 +19,19 @@ public:
 	ResultsView(BRect frame);
 		// Description : constructor
 	
-	~ResultsView();
+	virtual ~ResultsView();
 		// Description : destructor
 	
 	// -- Hooks ---------------------------------------------------------------
-	void FrameResized(float width, float height);
 	
 private:
-
+	BButton* m_pOk;
+		// Description : ok button
+		// Init        : By cons
+		
+	BButton* m_pCancel;
+		// Description : cancel button
+		// Init        : By cons
 };
 
 class ResultsWindow : public BWindow
@@ -36,12 +41,12 @@ public:
 	ResultsWindow(BRect frame, const std::string& strTitle);
 		// Description : constructor
 	
-	~ResultsWindow();
+	virtual ~ResultsWindow();
 		// Description : destructor
 		
 	// -- Hooks ---------------------------------------------------------------
-	void MessageReceived(BMessage *message);
-	bool QuitRequested();
+	virtual void MessageReceived(BMessage *message);
+//	virtual bool QuitRequested();
 
 private:
 	ResultsView* m_pView;

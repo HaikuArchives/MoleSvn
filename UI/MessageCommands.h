@@ -15,7 +15,8 @@ enum MessageCommand
 	MSG_Update   = 'MUPD',
 	MSG_Commit   = 'MCOM',
 	MSG_About    = 'MABO',
-	MSG_Ok       = 'M_OK'
+	MSG_Ok       = 'M_OK',
+	MSG_Cancel   = 'MCAN',
 };
 
 #endif //__MessageCommands_h__

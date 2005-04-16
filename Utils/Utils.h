@@ -16,6 +16,9 @@
 void ShowAboutWindow();
 	// Description : show an about window with different informations (version, ...)
 
+void ShowErrorWindow(const std::string& strMsg, const std::string& strTitle = std::string("Error"));
+	// Description : display an error window
+
 std::string FormatString(const char* pBuffer, ...);
 	// Description : like printf, but returns a string (usefull for debug string)
 

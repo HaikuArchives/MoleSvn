@@ -89,27 +89,41 @@ void MoleSvnAddon::ShowMenu(BPoint point)
 
 	// Create the menu
 	BPopUpMenu menu("menu");
-	menu.AddItem(new MenuItem("Update", C_Update));
-	menu.AddItem(new IconMenuItem("About", C_About, R_LogoIcon));
+	menu.AddItem(new MenuItem("Update", 	C_Update));
+	menu.AddItem(new MenuItem("Commit", 	C_Commit));
+	menu.AddSeparatorItem();
+	menu.AddItem(new MenuItem("Chekout", 	C_Checkout));
+	menu.AddSeparatorItem();
+	menu.AddItem(new MenuItem("Add", 		C_Add));
+	menu.AddSeparatorItem();
+	menu.AddItem(new MenuItem("Status", 	C_Status));
+	menu.AddSeparatorItem();
+	menu.AddItem(new IconMenuItem("About", 	C_About, 	R_LogoIcon));
 	
 	// Show the popup menu
 	TRACE_OBJECT ((CC_APPLICATION, CR_OBJECT, &point, "Popup menu point"));
 	MenuItem* pSelectedItem = reinterpret_cast<MenuItem *>(menu.Go(point, false, true));
-	if(pSelectedItem->GetCommand() == C_Update)
+	// !!! Be carefull !!!
+	// pSelectedItem may be NULL if the user does'nt click on the popup menu !!
+	if(pSelectedItem && pSelectedItem->GetCommand() == C_Update)
 	{
-/*	
-		ResultsWindow* pWindow = new ResultsWindow(BRect(10, 10, 400, 300), string("Update"));
+		BScreen screen;
+		BRect screenFrame = screen.Frame();
+		const float fWindowWidth = 400.0f;
+		const float fWindowHeight = 300.0f;
+		BRect windowFrame((screenFrame.Width() - fWindowWidth) / 2.0f, 
+		                  (screenFrame.Height() - fWindowHeight) / 2.0f, 
+		                  (screenFrame.Width() - fWindowWidth) / 2.0f + fWindowWidth, 
+		                  (screenFrame.Height() - fWindowHeight) / 2.0f + fWindowHeight);
+		ResultsWindow* pWindow = new ResultsWindow(windowFrame, string("Update"));
 		pWindow->Show();
 
 		// Wait until the window thread terminates. If we don't do this,
 		// our add-on might crash mysteriously, taking the Tracker with
 		// it. See also "Be Newsletter Volume II Issue 10".
 
-		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "avant wait"));
 		int32 exitValue;
 		wait_for_thread(pWindow->Thread(), &exitValue);
-		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "apres wait"));
-*/		
 	}
 }
 

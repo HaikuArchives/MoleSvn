@@ -9,6 +9,8 @@
 #include "Utils.h"
 #include "../Config.h"
 
+using namespace std;
+
 void ShowAboutWindow() 
 {
 	char version[1024];
@@ -21,6 +23,19 @@ void ShowAboutWindow()
 				B_WIDTH_AS_USUAL,
 				B_INFO_ALERT))->Go();
 }
+
+void ShowErrorWindow(const string& strMsg, const string& strTitle)
+{
+	(new BAlert(0, 
+				(strTitle + string("\n\n") + strTitle).c_str(),
+				"Okay",
+				0,
+				0,
+				B_WIDTH_AS_USUAL,
+				B_STOP_ALERT))->Go();
+
+}
+
 
 std::string FormatString(const char* pBuffer, ...)
 {
