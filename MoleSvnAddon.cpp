@@ -89,20 +89,20 @@ void MoleSvnAddon::ShowMenu(BPoint point)
 
 	// Create the menu
 	BPopUpMenu menu("menu");
-	menu.AddItem(new MenuItem("Update", 	C_Update));
-	menu.AddItem(new MenuItem("Commit", 	C_Commit));
+	menu.AddItem(new IconMenuItem("Update",		C_Update, 	R_Update));
+	menu.AddItem(new IconMenuItem("Commit",		C_Commit,	R_Commit));
 	menu.AddSeparatorItem();
-	menu.AddItem(new MenuItem("Chekout", 	C_Checkout));
+	menu.AddItem(new IconMenuItem("Chekout", 	C_Checkout,	R_Checkout));
 	menu.AddSeparatorItem();
-	menu.AddItem(new MenuItem("Add", 		C_Add));
+	menu.AddItem(new IconMenuItem("Add", 		C_Add,		R_Add));
 	menu.AddSeparatorItem();
-	menu.AddItem(new MenuItem("Status", 	C_Status));
+	menu.AddItem(new IconMenuItem("Status", 	C_Status,	R_Status));
 	menu.AddSeparatorItem();
 	menu.AddItem(new IconMenuItem("About", 	C_About, 	R_LogoIcon));
 	
 	// Show the popup menu
 	TRACE_OBJECT ((CC_APPLICATION, CR_OBJECT, &point, "Popup menu point"));
-	MenuItem* pSelectedItem = reinterpret_cast<MenuItem *>(menu.Go(point, false, true));
+	MenuItem* pSelectedItem = static_cast<MenuItem *>(menu.Go(point, false, true));
 	// !!! Be carefull !!!
 	// pSelectedItem may be NULL if the user does'nt click on the popup menu !!
 	if(pSelectedItem && pSelectedItem->GetCommand() == C_Update)
