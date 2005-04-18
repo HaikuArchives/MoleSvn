@@ -87,45 +87,88 @@ void MoleSvnAddon::ShowMenu(BPoint point)
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 
-	// Create the menu
-	BPopUpMenu menu("menu");
-	menu.AddItem(new IconMenuItem("Update",		C_Update, 	R_Update));
-	menu.AddItem(new IconMenuItem("Commit",		C_Commit,	R_Commit));
-	menu.AddSeparatorItem();
-	menu.AddItem(new IconMenuItem("Chekout", 	C_Checkout,	R_Checkout));
-	menu.AddSeparatorItem();
-	menu.AddItem(new IconMenuItem("Add", 		C_Add,		R_Add));
-	menu.AddSeparatorItem();
-	menu.AddItem(new IconMenuItem("Status", 	C_Status,	R_Status));
-	menu.AddSeparatorItem();
-	menu.AddItem(new IconMenuItem("About", 	C_About, 	R_LogoIcon));
-	
+	// Create popupmenu
+	BPopUpMenu* pMenu =  CreateMenu();
+
 	// Show the popup menu
 	TRACE_OBJECT ((CC_APPLICATION, CR_OBJECT, &point, "Popup menu point"));
-	MenuItem* pSelectedItem = static_cast<MenuItem *>(menu.Go(point, false, true));
+	MenuItem* pSelectedItem = static_cast<MenuItem *>(pMenu->Go(point, false, true));
 	// !!! Be carefull !!!
 	// pSelectedItem may be NULL if the user does'nt click on the popup menu !!
-	if(pSelectedItem && pSelectedItem->GetCommand() == C_Update)
+	if(!pSelectedItem)
+		return;
+	
+	// So, we must execute a svn command, yepa man !!
+	string strCmd;
+	switch(pSelectedItem->GetCommand())
 	{
-		BScreen screen;
-		BRect screenFrame = screen.Frame();
-		const float fWindowWidth = 400.0f;
-		const float fWindowHeight = 300.0f;
-		BRect windowFrame((screenFrame.Width() - fWindowWidth) / 2.0f, 
-		                  (screenFrame.Height() - fWindowHeight) / 2.0f, 
-		                  (screenFrame.Width() - fWindowWidth) / 2.0f + fWindowWidth, 
-		                  (screenFrame.Height() - fWindowHeight) / 2.0f + fWindowHeight);
-		ResultsWindow* pWindow = new ResultsWindow(windowFrame, string("Update"));
-		pWindow->Show();
+	case C_Update:
+		strCmd = string("Update");
+		break;
+	case C_Commit:
+		strCmd = string("Commit");
+		break;
+	case C_Checkout:
+		strCmd = string("Checkout");
+		break;
+	case C_Add:
+		strCmd = string("Add");
+		break;
+	case C_Status:
+		strCmd = string("Status");
+		break;
+	case C_About:
+		strCmd = string("About");
+		break;
+	}
+	
+	new ResultsWindow(strCmd);
+	
+	// Wait until the window thread terminates. If we don't do this,
+	// our add-on might crash mysteriously, taking the Tracker with
+	// it. See also "Be Newsletter Volume II Issue 10".
+	int32 exitValue;
+	while(m_setThread.size())
+	{
+		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Nb threads = %d", m_setThread.size()));
+		thread_id id = *m_setThread.begin();
+		
+		// Wait for thread
+		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Wait for thread id = %d", id));
+		wait_for_thread(id, &exitValue);
+		
+		// Remove thread_id from the running threads set
+		RemoveThread(id);
+	}
+		
+}
 
-		// Wait until the window thread terminates. If we don't do this,
-		// our add-on might crash mysteriously, taking the Tracker with
-		// it. See also "Be Newsletter Volume II Issue 10".
-
-		int32 exitValue;
-		wait_for_thread(pWindow->Thread(), &exitValue);
+void MoleSvnAddon::AddThread(thread_id id)
+{
+	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
+	
+	m_setThread.insert(id);
+	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Add thread id = %d", id));
+	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Nb threads = %d", m_setThread.size()));
+}
+		
+void MoleSvnAddon::RemoveThread(thread_id id)
+{
+	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
+	
+	set<thread_id, ltthread_id>::iterator ite = m_setThread.find(id);
+	if(ite != m_setThread.end())
+	{
+		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Erase thread id = %d", *ite));
+		m_setThread.erase(*ite);
+		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Nb threads = %d", m_setThread.size()));
+	}
+	else
+	{
+		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Thread id not found = %d", *ite));
 	}
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // -- Private
@@ -138,6 +181,27 @@ MoleSvnResources* MoleSvnAddon::GetResources()
 ///////////////////////////////////////////////////////////////////////////////
 // -- Private
 ///////////////////////////////////////////////////////////////////////////////
+BPopUpMenu* MoleSvnAddon::CreateMenu()
+{
+	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
+
+	// Create the menu
+	BPopUpMenu* pMenu = new BPopUpMenu("menu");
+	pMenu->AddItem(new IconMenuItem("Update",		C_Update, 	R_Update));
+	pMenu->AddItem(new IconMenuItem("Commit",		C_Commit,	R_Commit));
+	pMenu->AddSeparatorItem();
+	pMenu->AddItem(new IconMenuItem("Chekout", 	C_Checkout,	R_Checkout));
+	pMenu->AddSeparatorItem();
+	pMenu->AddItem(new IconMenuItem("Add", 		C_Add,		R_Add));
+	pMenu->AddSeparatorItem();
+	pMenu->AddItem(new IconMenuItem("Status", 	C_Status,	R_Status));
+	pMenu->AddSeparatorItem();
+	pMenu->AddItem(new IconMenuItem("About", 	C_About, 	R_LogoIcon));
+	
+	// returns the popupmenu
+	return pMenu;
+}
+
 image_id MoleSvnAddon::FindAddonImage()
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));

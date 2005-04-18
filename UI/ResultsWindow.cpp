@@ -15,21 +15,34 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 // -- ResultsWindow
 ///////////////////////////////////////////////////////////////////////////////
-ResultsWindow::ResultsWindow(BRect frame, const string& strTitle)
-:BWindow(frame, strTitle.c_str(), B_DOCUMENT_WINDOW, 0), m_pView(NULL)
+ResultsWindow::ResultsWindow(const string& strTitle)
+:BWindow(BRect(0,0,100,100), strTitle.c_str(), B_DOCUMENT_WINDOW, 0), m_pView(NULL)
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 
-	m_pView = new ResultsView(BRect(0,0,frame.Width(), frame.Height()));
+	// In the future, we must retrieve the old position and size from preferences
+	// Compute window position and size	
+	BScreen screen;
+	BRect screenFrame = screen.Frame();
+	const float fWindowWidth = 400.0f;
+	const float fWindowHeight = 300.0f;
+	MoveTo((screenFrame.Width() - fWindowWidth) / 2.0f, (screenFrame.Height() - fWindowHeight) / 2.0f);
+	ResizeTo(fWindowWidth, fWindowHeight);
+
+	m_pView = new ResultsView(BRect(0,0,Frame().Width(), Frame().Height()));
 	m_pView->SetViewColor(216, 216, 216);
 	
 	AddChild(m_pView);
+	
+	Show();
+	MoleSvnAddon::GetInstance()->AddThread(Thread());
 }
 	
 ResultsWindow::~ResultsWindow()
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 
+	MoleSvnAddon::GetInstance()->RemoveThread(Thread());
 }
 
 void ResultsWindow::MessageReceived(BMessage *message)

@@ -38,7 +38,7 @@ class ResultsWindow : public BWindow
 {
 public:
 	// -- Life-cycle ----------------------------------------------------------
-	ResultsWindow(BRect frame, const std::string& strTitle);
+	ResultsWindow(const std::string& strTitle);
 		// Description : constructor
 	
 	virtual ~ResultsWindow();

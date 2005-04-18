@@ -9,6 +9,7 @@
 #define __MoleSvnAddon_h__
 
 #include <list>
+#include <set>
 #include "Config.h"
 #include "Utils/MoleSvnResources.h"
 
@@ -38,11 +39,20 @@ public:
 		// Description : show the menu
 		// Remarks     : the content of the menu depends of the files selected by the user
 		
+	void AddThread(thread_id id);
+		// Description : add a thread id to the current list of running threads
+		
+	void RemoveThread(thread_id id);
+		// Description : remove a thread id to the current list of running threads
+		
 	// -- Accessors -----------------------------------------------------------
 	MoleSvnResources* GetResources();
 		// Description : returns a pointer to the addon resources
 	
 private:
+	// -- UI ------------------------------------------------------------------
+	BPopUpMenu* CreateMenu();
+		// Description : create the addon menu, corresponding to svn commands
 
 	// -- Misc ----------------------------------------------------------------
 	image_id FindAddonImage();
@@ -65,6 +75,17 @@ private:
 	MoleSvnResources* m_pResources;
 		// Description : pointer t the addon resource
 		// Init        : By cons
+	
+	struct ltthread_id 
+	{ 
+		bool operator()(const thread_id id1, const thread_id id2) const 
+  		{ 
+    		return id1 < id2; 
+	  	}; 
+	};
+	 	
+	std::set<thread_id, ltthread_id> m_setThread;
+		// Description : set of running threads
 		
 	TRACE_CLASS (CC_APPLICATION);
 };
