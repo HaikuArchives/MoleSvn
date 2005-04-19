@@ -63,7 +63,7 @@ void ResultsWindow::MessageReceived(BMessage *message)
 bool ResultsWindow::QuitRequested()
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
-	//be_app_messenger.SendMessage(B_QUIT_REQUESTED);
+
 	return true;
 }
 */

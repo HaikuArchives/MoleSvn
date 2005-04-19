@@ -8,20 +8,21 @@
 
 #include "MenuItem.h"
 
-MenuItem::MenuItem(const char* strLabel, MenuItemCommand cmd)
-:BMenuItem(strLabel, NULL), m_Command(cmd)
+MenuItem::MenuItem(SvnCommand* pSvnCmd)
+:BMenuItem(pSvnCmd->GetName().c_str(), NULL), m_pSvnCmd(pSvnCmd)
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 
 }
-		
+
 MenuItem::~MenuItem()
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 
 }
-		
-MenuItemCommand MenuItem::GetCommand() const
+
+SvnCommand* MenuItem::GetSvnCommand()
 {
-	return m_Command;
+	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
+	return m_pSvnCmd;
 }

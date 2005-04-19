@@ -15,7 +15,7 @@
 class IconMenuItem : public MenuItem
 {
 public:
-	IconMenuItem(const char* strLabel, MenuItemCommand cmd, MoleSvnIcons iconId);
+	IconMenuItem(SvnCommand* pSvnCmd);
 		// Description : contructor
 		
 	virtual ~IconMenuItem();
@@ -23,11 +23,6 @@ public:
 		
 	void DrawContent();
 		// Description : overrides default method, draws icon
-
-private:
-	BBitmap* m_pIcon;
-		// Description : icon of the menu item
-		// Init        : By cons
 };
 
 #endif //__IconMenuItem_h__

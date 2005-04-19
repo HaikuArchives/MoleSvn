@@ -14,6 +14,7 @@ enum MessageCommand
 	MSG_Add      = 'MADD',
 	MSG_Update   = 'MUPD',
 	MSG_Commit   = 'MCOM',
+	MSG_Status   = 'MSTA',
 	MSG_About    = 'MABO',
 	MSG_Ok       = 'M_OK',
 	MSG_Cancel   = 'MCAN',

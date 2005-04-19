@@ -12,6 +12,12 @@
 #include "UI/IconMenuItem.h"
 #include "UI/ResultsWindow.h"
 
+#include "Svn/Update.h"
+#include "Svn/Commit.h"
+#include "Svn/Add.h"
+#include "Svn/Checkout.h"
+#include "Svn/Status.h"
+
 #include <string>
 
 using namespace std;
@@ -95,35 +101,12 @@ void MoleSvnAddon::ShowMenu(BPoint point)
 	MenuItem* pSelectedItem = static_cast<MenuItem *>(pMenu->Go(point, false, true));
 	// !!! Be carefull !!!
 	// pSelectedItem may be NULL if the user does'nt click on the popup menu !!
-	if(!pSelectedItem)
-		return;
-	
-	// So, we must execute a svn command, yepa man !!
-	string strCmd;
-	switch(pSelectedItem->GetCommand())
+	if(pSelectedItem)
 	{
-	case C_Update:
-		strCmd = string("Update");
-		break;
-	case C_Commit:
-		strCmd = string("Commit");
-		break;
-	case C_Checkout:
-		strCmd = string("Checkout");
-		break;
-	case C_Add:
-		strCmd = string("Add");
-		break;
-	case C_Status:
-		strCmd = string("Status");
-		break;
-	case C_About:
-		strCmd = string("About");
-		break;
+		// Execute the selected command
+		pSelectedItem->GetSvnCommand()->Execute();
 	}
-	
-	new ResultsWindow(strCmd);
-	
+
 	// Wait until the window thread terminates. If we don't do this,
 	// our add-on might crash mysteriously, taking the Tracker with
 	// it. See also "Be Newsletter Volume II Issue 10".
@@ -187,17 +170,17 @@ BPopUpMenu* MoleSvnAddon::CreateMenu()
 
 	// Create the menu
 	BPopUpMenu* pMenu = new BPopUpMenu("menu");
-	pMenu->AddItem(new IconMenuItem("Update",		C_Update, 	R_Update));
-	pMenu->AddItem(new IconMenuItem("Commit",		C_Commit,	R_Commit));
+	pMenu->AddItem(new IconMenuItem(new Update()));
+	pMenu->AddItem(new IconMenuItem(new Commit()));
 	pMenu->AddSeparatorItem();
-	pMenu->AddItem(new IconMenuItem("Chekout", 	C_Checkout,	R_Checkout));
+	pMenu->AddItem(new IconMenuItem(new Checkout()));
 	pMenu->AddSeparatorItem();
-	pMenu->AddItem(new IconMenuItem("Add", 		C_Add,		R_Add));
+	pMenu->AddItem(new IconMenuItem(new Add()));
 	pMenu->AddSeparatorItem();
-	pMenu->AddItem(new IconMenuItem("Status", 	C_Status,	R_Status));
+	pMenu->AddItem(new IconMenuItem(new Status()));
 	pMenu->AddSeparatorItem();
-	pMenu->AddItem(new IconMenuItem("About", 	C_About, 	R_LogoIcon));
-	
+	//pMenu->AddItem(new IconMenuItem("About", 	C_About, 	R_LogoIcon));
+
 	// returns the popupmenu
 	return pMenu;
 }

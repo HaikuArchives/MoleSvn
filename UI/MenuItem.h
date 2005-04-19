@@ -9,32 +9,23 @@
 #define __MenuItem_h__
 
 #include "../Config.h"
-
-enum MenuItemCommand
-{
-	C_Checkout = 0,
-	C_Add,
-	C_Update,
-	C_Commit,
-	C_Status,
-	C_About,
-};
+#include "../Svn/SvnCommands.h"
 
 class MenuItem : public BMenuItem
 {
 public:
-	MenuItem(const char* strLabel, MenuItemCommand cmd);
+	MenuItem(SvnCommand* pSvnCmd);
 		// Description : contructor
 		
 	virtual ~MenuItem();
 		// Description : destructor
 		
-	MenuItemCommand GetCommand() const;
-		// Description: return the command of the menu item
-private:
-	MenuItemCommand m_Command;
-		// Description : svn commant for this menu item
-		// Init        : By cons
+	SvnCommand* GetSvnCommand();
+		// Description : returns the svn command of the menu item
+		
+protected:
+	SvnCommand* m_pSvnCmd;
+		// Description : svn command that the menu item must execute
 };
 
 #endif //__IconMenuItem_h__
