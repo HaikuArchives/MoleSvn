@@ -46,7 +46,17 @@ public:
 	BBitmap* GetLargeIcon() const;
 		// Description : Returns the large icon that represents the svn command
 	
+protected:
+	int ExecuteSvn(const std::string& strCommand);
+		// Description : execute the svn command strCommand in a shell
+
 private:
+
+	static int32 SpawnThread(void* arg);
+		// Description : spawns the real svn thread.
+		
+	int32 SvnCommandThread();
+	
 	std::string m_strName;
 		// Description : name of the svn command (ex: Update, Commit, Add, ...)
 		// Init        : By cons
@@ -63,8 +73,21 @@ private:
 		// Description : Large icon that represents the svn command
 		// Init        : By cons
 		
+	thread_id m_SvnThreadId;	
+	std::string m_strCommand;
+protected:	
+	BLooper* m_pTarget;
+	
 	TRACE_CLASS (CC_APPLICATION);
 };
+
+#include "Update.h"
+#include "Commit.h"
+#include "Add.h"
+#include "Checkout.h"
+#include "Status.h"
+#include "About.h"
+
 
 #endif //__SvnCommand_h__
 

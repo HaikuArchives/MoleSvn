@@ -24,7 +24,11 @@ public:
 	
 	// -- Hooks ---------------------------------------------------------------
 	
+	// -- Services ------------------------------------------------------------
+	void AddItem(const std::string& strText);
 private:
+	BListView* m_pListView;
+	
 	BButton* m_pOk;
 		// Description : ok button
 		// Init        : By cons

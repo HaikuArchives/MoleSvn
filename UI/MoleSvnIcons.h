@@ -16,6 +16,7 @@ enum MoleSvnIcons
 	R_Add      = 1003,
 	R_Checkout = 1004,
 	R_Status   = 1005,
+	R_About    = 1006,
 };
 
 #endif //__MoleSvnIcons_h__

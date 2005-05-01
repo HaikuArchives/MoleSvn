@@ -12,11 +12,7 @@
 #include "UI/IconMenuItem.h"
 #include "UI/ResultsWindow.h"
 
-#include "Svn/Update.h"
-#include "Svn/Commit.h"
-#include "Svn/Add.h"
-#include "Svn/Checkout.h"
-#include "Svn/Status.h"
+#include "Svn/SvnCommands.h"
 
 #include <string>
 
@@ -179,7 +175,7 @@ BPopUpMenu* MoleSvnAddon::CreateMenu()
 	pMenu->AddSeparatorItem();
 	pMenu->AddItem(new IconMenuItem(new Status()));
 	pMenu->AddSeparatorItem();
-	//pMenu->AddItem(new IconMenuItem("About", 	C_About, 	R_LogoIcon));
+	pMenu->AddItem(new IconMenuItem(new About()));
 
 	// returns the popupmenu
 	return pMenu;

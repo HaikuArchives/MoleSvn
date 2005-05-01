@@ -32,7 +32,17 @@ void Update::Execute()
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 	
-	new ResultsWindow(GetName());
+	ResultsWindow* pWindow = new ResultsWindow(GetName());
+	m_pTarget = pWindow;
+	
+	int nError = ExecuteSvn(string("svn --help"));
+	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Execute error = %d", nError));
+
+	if(nError)
+	{
+		ShowErrorWindow(string("update failed"));
+		pWindow->Quit();
+	}
 }
 
 

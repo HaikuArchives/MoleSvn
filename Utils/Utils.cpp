@@ -27,7 +27,7 @@ void ShowAboutWindow()
 void ShowErrorWindow(const string& strMsg, const string& strTitle)
 {
 	(new BAlert(0, 
-				(strTitle + string("\n\n") + strTitle).c_str(),
+				(strTitle + string("\n\n") + strMsg).c_str(),
 				"Okay",
 				0,
 				0,

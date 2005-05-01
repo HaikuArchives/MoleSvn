@@ -49,6 +49,14 @@ void ResultsWindow::MessageReceived(BMessage *message)
 {
 	switch(message->what)
 	{
+		case 'SVNC':
+		{
+			TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "SVNC received"));
+			const char* buf;
+			message->FindString("text", 0, &buf);
+			m_pView->AddItem(string(buf));	
+			break;
+		}
 		case MSG_Ok:
 		{
 			PostMessage(B_QUIT_REQUESTED);
@@ -83,15 +91,14 @@ ResultsView::ResultsView(BRect frame)
 	                   g_fSpaceToWindowBorder,
 	                   frame.Width() - (g_fSpaceToWindowBorder + B_V_SCROLL_BAR_WIDTH),
 	                   frame.Height() - (g_fSpaceToWindowBorder + g_fButtonHeight + g_fSpaceToWindowBorder + B_H_SCROLL_BAR_HEIGHT) );
-	BListView* pListView = new BListView(ListViewRect, 
-	                                     "ResultWindow_ListView",
-	                                     B_SINGLE_SELECTION_LIST,
-	                                     B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP_BOTTOM,
-	                                     B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS | B_FULL_UPDATE_ON_RESIZE);
-	pListView->AddItem(new BStringItem("Toto"));
-	pListView->AddItem(new BStringItem("Titi"));
+	m_pListView = new BListView(ListViewRect, 
+	                            "ResultWindow_ListView",
+	                            B_SINGLE_SELECTION_LIST,
+	                            B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP_BOTTOM,
+	                            B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS | B_FULL_UPDATE_ON_RESIZE);
+
 	AddChild(new BScrollView("ResultWindows_ScrollView", 
-	                         pListView,
+	                         m_pListView,
 	                         B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP_BOTTOM,
 	                         B_FRAME_EVENTS | B_FULL_UPDATE_ON_RESIZE,
 	                         true,
@@ -123,5 +130,10 @@ ResultsView::~ResultsView()
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 
+}
+
+void ResultsView::AddItem(const std::string& strText)
+{
+	m_pListView->AddItem(new BStringItem(strText.c_str()));
 }
 
