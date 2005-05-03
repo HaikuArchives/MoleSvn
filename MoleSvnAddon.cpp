@@ -82,6 +82,11 @@ void MoleSvnAddon::SetParameters(const entry_ref& rCurrentDirectory,
 	m_CurrentDirectory = rCurrentDirectory;
 	m_lstEntry = lstEntry;
 	
+	// Set current working directory, where the user has clicked
+	BPath path(&m_CurrentDirectory);
+	chdir(path.Path());
+	
+	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Current directory = %s", path.Path()));
 	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Nb entries = %i", m_lstEntry.size()));
 }
 
@@ -150,11 +155,25 @@ void MoleSvnAddon::RemoveThread(thread_id id)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// -- Private
+// -- Accessors
 ///////////////////////////////////////////////////////////////////////////////
 MoleSvnResources* MoleSvnAddon::GetResources()
 {
 	return m_pResources;
+}
+
+string MoleSvnAddon::GetEntryNameList() const
+{
+	string strRes;
+	list<entry_ref>::const_iterator ite = m_lstEntry.begin();
+	
+	while(ite != m_lstEntry.end())
+	{
+		strRes += string( (*ite).name ) + string(" ");		
+		++ite;
+	}
+	
+	return strRes;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

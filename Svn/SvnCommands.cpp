@@ -29,35 +29,7 @@ SvnCommand::SvnCommand(const std::string& strName, MessageCommand msgCmd,
 	MoleSvnAddon::GetInstance()->GetResources()->LoadIcon('MICN', iconId, &m_pMiniIcon);
 	MoleSvnAddon::GetInstance()->GetResources()->LoadIcon('ICON', iconId, &m_pLargeIcon);
 }
-/*
-SvnCommand::SvnCommand(const SvnCommand& rSvnCmd)
-:m_strName(rSvnCmd.m_strName), m_msgCmd(rSvnCmd.msgCmd), m_pMiniIcon(NULL), m_pLargeIcon(NULL)
-{
-	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 
-	if(rSvnCmd.m_pMiniIcon)
-	{
-		m_pMiniIcon = new BBitmap(rSvnCmd.m_pMiniIcon->Bounds(), 
-								  rSvnCmd.m_pMiniIcon->ColorSpace() );
-								  
-		m_pMiniIcon->SetBits(rSvnCmd.m_pMiniIcon->Bits(),
-		                     rSvnCmd.m_pMiniIcon->BitsLength(),
-		                     0,
-		                     rSvnCmd.m_pMiniIcon->ColorSpace());
-	}
-
-	if(rSvnCmd.m_pLargeIcon)
-	{
-		m_pLargeIcon = new BBitmap(rSvnCmd.m_pLargeIcon->Bounds(), 
-		                           rSvnCmd.m_pLargeIcon->ColorSpace() );
-		                           
-		m_pLargeIcon->SetBits(rSvnCmd.m_pLargeIcon->Bits(),
-		                      rSvnCmd.m_pLargeIcon->BitsLength(),
-		                      0,
-		                      rSvnCmd.m_pLargeIcon->ColorSpace());
-	}
-}
-*/
 SvnCommand::~SvnCommand()
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
@@ -111,131 +83,144 @@ int SvnCommand::ExecuteSvn(const string& strCommand)
 	
 	m_strCommand = strCommand;
 
-	// Create a new thread
-	m_SvnThreadId = spawn_thread(SpawnThread, "MoleSvnCommandThread", B_NORMAL_PRIORITY, this);
-
-	resume_thread(m_SvnThreadId); 
-	
-	int32 exitValue;
-	wait_for_thread(m_SvnThreadId, &exitValue);	
-	
-	return exitValue;
-/*
-    int StdoutSave, StderrSave; 
-    int Pipes[2]; 
-
-	// Save the stdout and stderr handle
-    StdoutSave = dup(HF_STDOUT);
-    StderrSave = dup(HF_STDERR);
-    //close(StdoutSave);
-
 	// Create new pipes
-    pipe(Pipes); 
-
-	// Redirect stdout, stderr
-    dup2(Pipes[1], HF_STDOUT);
-    dup2(Pipes[1], HF_STDERR);
-  
-    // Execute svn command
-	string strCmd(strCommand);
-	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Execute = %s", strCmd.c_str()));
-	int nErrorCode = system(strCmd.c_str());
-	//int nErrorCode = execl("svn", "--version");
-
-    close(Pipes[1]); 
-
-	// Read the pipe 0
-    char Line[128]; 
-    ifstream R(Pipes[0]); 
-    //ofstream Log("log.txt"); 
-    int nIndex = 0;
+    pipe(m_Pipes); 
     
-    while (!R.eof() && nIndex < 30) 
-    { 
-		R.getline(Line,sizeof(Line)); 
-		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "%d : %s", nIndex, Line));
-        //Log << Line << flush; 
-        ++nIndex;
-    } 
-    
-    R.close();
+	pid_t pid; 
+    pid = fork();
+    if(pid == -1)
+    {
+		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Fork failed"));
+		return -1;
+    }
+    else if(pid == 0)
+	{
+		// Close reading pipe
+		close(m_Pipes[0]);
+		
+		// Duplicate STDOUT to our pipe
+		dup2(m_Pipes[1], HF_STDOUT);
+		
+		// close our writing pipe, because we must have only one pipe open
+		// and STDOUT is already open
+		close(m_Pipes[1]);
 
-	// Close pipe
-    close(Pipes[0]);
-  
-    // Restore default stdout and stderr
-    dup2(StdoutSave, HF_STDOUT);
-    dup2(StderrSave, HF_STDERR); 
+		// Execute command
+		string strCmd = m_strCommand + string(" ") + MoleSvnAddon::GetInstance()->GetEntryNameList();
+		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Execute = %s", strCmd.c_str()));
+		//int err = execl(strCmd.c_str(), NULL);
+		int m_SvnError = system(strCmd.c_str());
+		
+		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Svn returns : %d", m_SvnError));
+		exit(m_SvnError);
+	}
 
-	// Return svn command error code
-	return nErrorCode;
+	// Create a new thread
+//	m_SvnThreadId = spawn_thread(SpawnThread, "MoleSvnCommandThread", B_NORMAL_PRIORITY, this);
+
+//	resume_thread(m_SvnThreadId);
+
+	RetrieveSvnOutput();	
+
+/*	
+	int32 exitValue = 0;
+	if(m_SvnThreadId)
+	{
+		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Wait for svn command thread = %d", m_SvnThreadId));
+		wait_for_thread(m_SvnThreadId, &exitValue);	
+	}
 */
+	
+//	return exitValue;
+	return 0;
 }
+
+string SvnCommand::GetCommand() const
+{
+	return m_strCommand;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // -- Private
 ///////////////////////////////////////////////////////////////////////////////
 int32 SvnCommand::SpawnThread(void* arg) 
 { 
-	return ((SvnCommand*) arg)->SvnCommandThread();
+	int nError = ((SvnCommand*) arg)->SvnCommandThread();
+	((SvnCommand*) arg)->m_SvnThreadId = 0;	
+	return nError;
 }
 
 int32 SvnCommand::SvnCommandThread()
 {
-	char fileName[B_PATH_NAME_LENGTH]; 
-	const int32 nBufferSize = 512;
-	char tempString[nBufferSize];
-	
-	// Create a temporary file, where to write stdout
-	BPath tempFile;
-	sprintf(fileName, "/boot/var/tmp/MoleSvn%ld", find_thread(NULL));
-	tempFile.SetTo(fileName);
-	
-	// Create the command string
-	string strCmd(m_strCommand + " > \"" + string(tempFile.Path()) + "\"");
-	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Execute = %s", strCmd.c_str()));
-	
-	// Launch the svn command
-	int nErrorCode = system(strCmd.c_str());
-	
-	// Read each line of the file
-	if ((nErrorCode == 0))
-	{
-		FILE* results = fopen(tempFile.Path(), "r");
+	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
+	return 0;	
+}
 
-		if (results != NULL)
-		{
-			while (fgets(tempString, nBufferSize, results) != 0)
-			{
-				// Create a message
-				BMessage msg('SVNC');
+void SvnCommand::RetrieveSvnOutput()
+{
+	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
+	
+	// We don't need writing, so we close
+	close(m_Pipes[1]);
+
+	// Read the pipe 0
+    char Line[128]; 
+    ifstream R(m_Pipes[0]); 
+    bool bHasMessage = false;
+    
+	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Reading pipe..."));
+	do
+    { 
+		R.getline(Line,sizeof(Line)); 
+		
+		string strTmp(Line);
+		// check if the line is not empty
+		if(strTmp.size() > 0)
+		{	
+			// Create a message
+			BMessage msg('SVNC');
+		
+			// Add text to message
+			msg.AddString("text", strTmp.c_str());
 				
-				// Replace non printable caracter by space
-				string strTmp(tempString);
-				strTmp[strTmp.size() - 1] = 0;
-				
-				// Add text to message
-				msg.AddString("text", strTmp.c_str());
-				
-				// Send message
-				TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "%s", tempString));
-				m_pTarget->PostMessage(&msg);
-			}
+			// Send message
+			m_pTarget->PostMessage(&msg);
 			
-			// Close the tempoerary file
-			fclose(results);
-		}
-	}
+			bHasMessage = true;
+    	}
+    } while (!R.eof());
+
+	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "End of reading pipe..."));
+
+	// Close stream    
+    R.close();
+
+	// Close pipe
+    close(m_Pipes[0]);
 /*
-	// End message		
-	BMessage msg;
-	msg.AddString("text", tempString);
-	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "%s", tempString));
-	m_pTarget->PostMessage(&msg);
-*/				
-	
-	// Remove the temporary file
-	remove(tempFile.Path());
-	
-	return nErrorCode;	
+    if(!bHasMessage && !m_SvnError)
+    {
+		// Create a message
+		BMessage msg('SVNQ');
+		
+		// Add text to message
+		msg.AddString("text", "operation finished...");
+				
+		// Send message
+		m_pTarget->PostMessage(&msg);
+    }
+    
+    if(m_SvnError)
+    {
+		// Create a message
+		BMessage msg('MERR');
+		
+		// Add text to message
+		msg.AddString("text", "operation finished...");
+				
+		// Send message
+		m_pTarget->PostMessage(&msg);
+    }
+*/    
 }

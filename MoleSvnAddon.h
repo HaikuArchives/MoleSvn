@@ -49,6 +49,8 @@ public:
 	MoleSvnResources* GetResources();
 		// Description : returns a pointer to the addon resources
 	
+	std::string GetEntryNameList() const;
+		// Description : returns the list name of all selected entries by the user
 private:
 	// -- UI ------------------------------------------------------------------
 	BPopUpMenu* CreateMenu();
@@ -68,7 +70,7 @@ private:
 		// Description : entry_ref from where the user launchs the addon
 		// Init        : By cons
 		
-	list<entry_ref> m_lstEntry;
+	std::list<entry_ref> m_lstEntry;
 		// Description : entry_ref list that the user has selected
 		// Init        : By cons
 	

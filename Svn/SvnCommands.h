@@ -50,12 +50,15 @@ protected:
 	int ExecuteSvn(const std::string& strCommand);
 		// Description : execute the svn command strCommand in a shell
 
+	std::string GetCommand() const;
+		// Description : returns the command string
 private:
 
 	static int32 SpawnThread(void* arg);
 		// Description : spawns the real svn thread.
 		
 	int32 SvnCommandThread();
+	void RetrieveSvnOutput();
 	
 	std::string m_strName;
 		// Description : name of the svn command (ex: Update, Commit, Add, ...)
@@ -73,8 +76,17 @@ private:
 		// Description : Large icon that represents the svn command
 		// Init        : By cons
 		
-	thread_id m_SvnThreadId;	
+	int m_Pipes[2];
+		// Description : pipes for reading standard output
+	
 	std::string m_strCommand;
+		// Description : string that represents the command line  
+	
+	int m_SvnError;
+		// Description : svn erturn value
+
+	thread_id m_SvnThreadId;	
+	
 protected:	
 	BLooper* m_pTarget;
 	
