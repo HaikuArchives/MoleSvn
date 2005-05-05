@@ -14,7 +14,7 @@ using namespace std;
 // -- Life-cycle
 ///////////////////////////////////////////////////////////////////////////////
 Add::Add()
-:SvnCommand("Add", MSG_Add, R_Add)
+:SvnCommand("Add", MSG_ADD, R_Add)
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 }

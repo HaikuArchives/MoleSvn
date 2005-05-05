@@ -14,7 +14,7 @@ using namespace std;
 // -- Life-cycle
 ///////////////////////////////////////////////////////////////////////////////
 Commit::Commit()
-:SvnCommand("Commit", MSG_Commit, R_Commit)
+:SvnCommand("Commit", MSG_COMMIT, R_Commit)
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 }

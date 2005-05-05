@@ -49,6 +49,10 @@ public:
 	MoleSvnResources* GetResources();
 		// Description : returns a pointer to the addon resources
 	
+	entry_ref* GetCurrentDirectory();
+		// Description : returns the current working directory
+
+	
 	std::string GetEntryNameList() const;
 		// Description : returns the list name of all selected entries by the user
 private:

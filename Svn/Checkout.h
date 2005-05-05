@@ -26,6 +26,9 @@ public:
 	void Execute();
 		// Description : executes the Checkout command
 		
+	// -- Hooks ---------------------------------------------------------------
+	virtual void MessageReceived(BMessage *message);
+		
 	// -- Accessors -----------------------------------------------------------
 	
 private:

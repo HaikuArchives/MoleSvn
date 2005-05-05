@@ -101,7 +101,7 @@ void MoleSvnAddon::ShowMenu(BPoint point)
 	TRACE_OBJECT ((CC_APPLICATION, CR_OBJECT, &point, "Popup menu point"));
 	MenuItem* pSelectedItem = static_cast<MenuItem *>(pMenu->Go(point, false, true));
 	// !!! Be carefull !!!
-	// pSelectedItem may be NULL if the user does'nt click on the popup menu !!
+	// pSelectedItem may be NULL if the user doesn't click on the popup menu !!
 	if(pSelectedItem)
 	{
 		// Execute the selected command
@@ -161,6 +161,12 @@ MoleSvnResources* MoleSvnAddon::GetResources()
 {
 	return m_pResources;
 }
+
+entry_ref* MoleSvnAddon::GetCurrentDirectory()
+{
+	return &m_CurrentDirectory;
+}
+
 
 string MoleSvnAddon::GetEntryNameList() const
 {

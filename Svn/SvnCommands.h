@@ -14,7 +14,7 @@
 #include "../UI/MoleSvnIcons.h"
 #include "../UI/MessageCommands.h"
 
-class SvnCommand
+class SvnCommand : public BHandler
 {
 public:
 	// -- Life-cycle ----------------------------------------------------------
@@ -32,6 +32,9 @@ public:
 		// Description : executes the svn command
 		// Remarks     : svn commands must overide this function and launch the
 		//               corresponding command
+
+	// -- Hooks ---------------------------------------------------------------
+	virtual void MessageReceived(BMessage *message);
 		
 	// -- Accessors -----------------------------------------------------------
 	const std::string& GetName() const;
@@ -46,10 +49,11 @@ public:
 	BBitmap* GetLargeIcon() const;
 		// Description : Returns the large icon that represents the svn command
 	
-protected:
 	int ExecuteSvn(const std::string& strCommand);
 		// Description : execute the svn command strCommand in a shell
 
+	void SetTarget(BLooper* pTarget);
+protected:
 	std::string GetCommand() const;
 		// Description : returns the command string
 private:

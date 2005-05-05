@@ -33,7 +33,6 @@ ResultsWindow::ResultsWindow(const string& strTitle)
 	m_pView->SetViewColor(216, 216, 216);
 	
 	AddChild(m_pView);
-	
 	Show();
 	MoleSvnAddon::GetInstance()->AddThread(Thread());
 }
@@ -49,7 +48,7 @@ void ResultsWindow::MessageReceived(BMessage *message)
 {
 	switch(message->what)
 	{
-		case 'SVNC':
+		case MSG_SVN_STDOUT:
 		{
 			TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "SVNC received"));
 			const char* buf;
@@ -57,7 +56,7 @@ void ResultsWindow::MessageReceived(BMessage *message)
 			m_pView->AddItem(string(buf));	
 			break;
 		}
-		case MSG_Ok:
+		case MSG_OK:
 		{
 			PostMessage(B_QUIT_REQUESTED);
 			break;
@@ -72,6 +71,8 @@ bool ResultsWindow::QuitRequested()
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 
+	// stop svn execution
+	
 	return true;
 }
 */
@@ -110,7 +111,7 @@ ResultsView::ResultsView(BRect frame)
 	m_pOk = new BButton(BRect(fButtonX, fButtonY, fButtonX + g_fButtonWidth, fButtonY + g_fButtonHeight),
 		    				  "ResultsWindow_Ok", 
 	                          "Ok",
-	                          new BMessage(MSG_Ok),
+	                          new BMessage(MSG_OK),
 	                          B_FOLLOW_RIGHT | B_FOLLOW_BOTTOM);
 	m_pOk->MakeDefault(true);
 	AddChild(m_pOk);
@@ -120,7 +121,7 @@ ResultsView::ResultsView(BRect frame)
 	m_pCancel = new BButton(BRect(fButtonX, fButtonY, fButtonX + g_fButtonWidth, fButtonY + g_fButtonHeight),
 		    				  "ResultsWindow_Cancel", 
 	                          "Cancel",
-	                          new BMessage(MSG_Cancel),
+	                          new BMessage(MSG_CANCEL),
 	                          B_FOLLOW_RIGHT | B_FOLLOW_BOTTOM);
 	m_pCancel->SetEnabled(false);
 	AddChild(m_pCancel);

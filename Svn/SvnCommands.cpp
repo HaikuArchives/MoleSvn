@@ -50,6 +50,13 @@ SvnCommand::~SvnCommand()
 // -- Services
 ///////////////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////////////
+// -- Accessors
+///////////////////////////////////////////////////////////////////////////////
+ void SvnCommand::MessageReceived(BMessage *message)
+ {
+ 	
+ }
 
 ///////////////////////////////////////////////////////////////////////////////
 // -- Accessors
@@ -135,6 +142,11 @@ int SvnCommand::ExecuteSvn(const string& strCommand)
 	return 0;
 }
 
+void SvnCommand::SetTarget(BLooper* pTarget)
+{
+	m_pTarget = pTarget;	
+}
+
 string SvnCommand::GetCommand() const
 {
 	return m_strCommand;
@@ -179,7 +191,7 @@ void SvnCommand::RetrieveSvnOutput()
 		if(strTmp.size() > 0)
 		{	
 			// Create a message
-			BMessage msg('SVNC');
+			BMessage msg(MSG_SVN_STDOUT);
 		
 			// Add text to message
 			msg.AddString("text", strTmp.c_str());

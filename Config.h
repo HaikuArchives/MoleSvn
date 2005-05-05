@@ -29,6 +29,7 @@
 // UI constants
 const float g_fButtonWidth = 80.0f;			// Width of buttons
 const float g_fButtonHeight = 25.0f;		// Height of buttons
+const float g_fControlSpace = 20.0f;        // Space between controls
 const float g_fButtonsSpace = 20.0f;		// Space between buttons
 const float g_fSpaceToWindowBorder = 20.0f;	// Space between control and window border 
 

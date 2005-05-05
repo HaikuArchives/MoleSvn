@@ -14,7 +14,7 @@ using namespace std;
 // -- Life-cycle
 ///////////////////////////////////////////////////////////////////////////////
 Status::Status()
-:SvnCommand("Status", MSG_Status, R_Status)
+:SvnCommand("Status", MSG_STATUS, R_Status)
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 }
