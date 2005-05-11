@@ -24,10 +24,14 @@ public:
 	
 	// -- Hooks ---------------------------------------------------------------
 	
+	// -- Accessors -----------------------------------------------------------
+	BButton* GetOkButton();
+	
 	// -- Services ------------------------------------------------------------
 	void AddItem(const std::string& strText);
 private:
 	BListView* m_pListView;
+		// Temporary, must be CLV
 	
 	BButton* m_pOk;
 		// Description : ok button
@@ -50,7 +54,7 @@ public:
 		
 	// -- Hooks ---------------------------------------------------------------
 	virtual void MessageReceived(BMessage *message);
-//	virtual bool QuitRequested();
+	virtual bool QuitRequested();
 
 private:
 	ResultsView* m_pView;

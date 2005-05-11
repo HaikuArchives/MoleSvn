@@ -22,6 +22,7 @@ enum MessageCommand
 
 	MSG_EXECUTE_CMD   = 'MEXE',
 	MSG_SVN_STDOUT    = 'MSTD',
+	MSG_CMD_FINISHED  = 'MFNS',
 };
 
 #endif //__MessageCommands_h__

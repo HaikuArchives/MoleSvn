@@ -56,6 +56,11 @@ void ResultsWindow::MessageReceived(BMessage *message)
 			m_pView->AddItem(string(buf));	
 			break;
 		}
+		case MSG_CMD_FINISHED:
+		{
+			m_pView->GetOkButton()->SetEnabled(true);
+			break;
+		}
 		case MSG_OK:
 		{
 			PostMessage(B_QUIT_REQUESTED);
@@ -66,16 +71,17 @@ void ResultsWindow::MessageReceived(BMessage *message)
 			break;
 	}
 }
-/*
+
 bool ResultsWindow::QuitRequested()
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 
 	// stop svn execution
 	
-	return true;
+	return m_pView->GetOkButton()->IsEnabled();
 }
-*/
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // -- ResultsView
 ///////////////////////////////////////////////////////////////////////////////
@@ -114,6 +120,7 @@ ResultsView::ResultsView(BRect frame)
 	                          new BMessage(MSG_OK),
 	                          B_FOLLOW_RIGHT | B_FOLLOW_BOTTOM);
 	m_pOk->MakeDefault(true);
+	m_pOk->SetEnabled(false);
 	AddChild(m_pOk);
 
 	// Cancel button
@@ -133,8 +140,16 @@ ResultsView::~ResultsView()
 
 }
 
+BButton* ResultsView::GetOkButton()
+{
+	return m_pOk;
+}
+
 void ResultsView::AddItem(const std::string& strText)
 {
 	m_pListView->AddItem(new BStringItem(strText.c_str()));
+	m_pListView->Select(m_pListView->CountItems()-1);
+	m_pListView->ScrollToSelection();
 }
+
 

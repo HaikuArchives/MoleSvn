@@ -117,7 +117,9 @@ int SvnCommand::ExecuteSvn(const string& strCommand)
 		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Execute = %s", strCmd.c_str()));
 		//int err = execl(strCmd.c_str(), NULL);
 		int m_SvnError = system(strCmd.c_str());
-		
+
+		close(HF_STDOUT);
+				
 		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Svn returns : %d", m_SvnError));
 		exit(m_SvnError);
 	}
@@ -181,12 +183,13 @@ void SvnCommand::RetrieveSvnOutput()
     ifstream R(m_Pipes[0]); 
     bool bHasMessage = false;
     
+    string strTmp;
 	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Reading pipe..."));
 	do
     { 
 		R.getline(Line,sizeof(Line)); 
 		
-		string strTmp(Line);
+		strTmp = string(Line);
 		// check if the line is not empty
 		if(strTmp.size() > 0)
 		{	
@@ -210,11 +213,11 @@ void SvnCommand::RetrieveSvnOutput()
 
 	// Close pipe
     close(m_Pipes[0]);
-/*
+    
     if(!bHasMessage && !m_SvnError)
     {
 		// Create a message
-		BMessage msg('SVNQ');
+		BMessage msg(MSG_SVN_STDOUT);
 		
 		// Add text to message
 		msg.AddString("text", "operation finished...");
@@ -223,6 +226,12 @@ void SvnCommand::RetrieveSvnOutput()
 		m_pTarget->PostMessage(&msg);
     }
     
+    
+	// Create a message
+	BMessage msg(MSG_CMD_FINISHED);
+	// Send message
+	m_pTarget->PostMessage(&msg);
+/*
     if(m_SvnError)
     {
 		// Create a message
