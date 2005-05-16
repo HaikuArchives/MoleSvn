@@ -50,7 +50,6 @@ void ResultsWindow::MessageReceived(BMessage *message)
 	{
 		case MSG_SVN_STDOUT:
 		{
-			TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "SVNC received"));
 			const char* buf;
 			message->FindString("text", 0, &buf);
 			m_pView->AddItem(string(buf));	
@@ -148,8 +147,19 @@ BButton* ResultsView::GetOkButton()
 void ResultsView::AddItem(const std::string& strText)
 {
 	m_pListView->AddItem(new BStringItem(strText.c_str()));
-	m_pListView->Select(m_pListView->CountItems()-1);
-	m_pListView->ScrollToSelection();
+	int nItems = m_pListView->CountItems();
+	
+	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "m_pListView->CurrentSelection() : %d", m_pListView->CurrentSelection()));
+	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "m_pListView->CountItems() : %d", m_pListView->CountItems()));
+	
+	// We have just on item, so we select it
+	if(nItems == 1)
+		m_pListView->Select(0);	
+	else if(nItems == m_pListView->CurrentSelection()+2)
+	{
+		m_pListView->Select(nItems-1);
+		m_pListView->ScrollToSelection();
+	}
 }
 
 

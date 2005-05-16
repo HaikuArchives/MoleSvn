@@ -32,7 +32,9 @@ void Add::Execute()
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 	
-	new ResultsWindow(GetName());
+	m_pTarget = new ResultsWindow(GetName());
+	
+	ExecuteSvn(string("svn add"));	
 }
 
 

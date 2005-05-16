@@ -32,7 +32,8 @@ void About::Execute()
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 	
-	new ResultsWindow(GetName());
+	// Show a tiny message ;)
+	ShowAboutWindow();
 }
 
 

@@ -89,9 +89,11 @@ int SvnCommand::ExecuteSvn(const string& strCommand)
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 	
 	m_strCommand = strCommand;
+	m_SvnError = 0;
 
 	// Create new pipes
-    pipe(m_Pipes); 
+    pipe(m_StdoutPipes); 
+    pipe(m_StderrPipes); 
     
 	pid_t pid; 
     pid = fork();
@@ -103,14 +105,17 @@ int SvnCommand::ExecuteSvn(const string& strCommand)
     else if(pid == 0)
 	{
 		// Close reading pipe
-		close(m_Pipes[0]);
+		close(m_StdoutPipes[0]);
+		close(m_StderrPipes[0]);
 		
-		// Duplicate STDOUT to our pipe
-		dup2(m_Pipes[1], HF_STDOUT);
+		// Duplicate STDOUT adn STDERR to ours pipes
+		dup2(m_StdoutPipes[1], HF_STDOUT);
+		dup2(m_StderrPipes[1], HF_STDERR);
 		
 		// close our writing pipe, because we must have only one pipe open
 		// and STDOUT is already open
-		close(m_Pipes[1]);
+		close(m_StdoutPipes[1]);
+		close(m_StderrPipes[1]);
 
 		// Execute command
 		string strCmd = m_strCommand + string(" ") + MoleSvnAddon::GetInstance()->GetEntryNameList();
@@ -119,6 +124,7 @@ int SvnCommand::ExecuteSvn(const string& strCommand)
 		int m_SvnError = system(strCmd.c_str());
 
 		close(HF_STDOUT);
+		close(HF_STDERR);
 				
 		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Svn returns : %d", m_SvnError));
 		exit(m_SvnError);
@@ -176,11 +182,12 @@ void SvnCommand::RetrieveSvnOutput()
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 	
 	// We don't need writing, so we close
-	close(m_Pipes[1]);
+	close(m_StdoutPipes[1]);
+	close(m_StderrPipes[1]);
 
 	// Read the pipe 0
     char Line[128]; 
-    ifstream R(m_Pipes[0]); 
+    ifstream R(m_StdoutPipes[0]); 
     bool bHasMessage = false;
     
     string strTmp;
@@ -212,36 +219,52 @@ void SvnCommand::RetrieveSvnOutput()
     R.close();
 
 	// Close pipe
-    close(m_Pipes[0]);
-    
-    if(!bHasMessage && !m_SvnError)
+    close(m_StdoutPipes[0]);
+
+	// Send a finished message, in case where there is no output and no error,
+	// just to inform the user that the operation is finished    
+    if(!bHasMessage /*&& !m_SvnError*/)
     {
 		// Create a message
 		BMessage msg(MSG_SVN_STDOUT);
 		
 		// Add text to message
-		msg.AddString("text", "operation finished...");
+		msg.AddString("text", "operation finished.");
 				
 		// Send message
 		m_pTarget->PostMessage(&msg);
     }
+
+	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "SVN error : %d", m_SvnError));
+	
+	// Check if we have a svn error
+	if(m_SvnError)
+	{
+		// Read stderr
+    	ifstream ErrStream(m_StderrPipes[0]); 
     
+    	string strErr;
+		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Reading stderr pipe..."));
+		do
+	    { 
+			ErrStream.getline(Line,sizeof(Line)); 
+		
+			strErr += string(Line);
+    	} while (!ErrStream.eof());
+
+		// Close stream    
+    	ErrStream.close();
+ 
+		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "End of reading stderr pipe..."));
+		
+ 		ShowErrorWindow(strErr);   	
+	}
+	
+	// Close pipe
+    close(m_StderrPipes[0]);
     
 	// Create a message
 	BMessage msg(MSG_CMD_FINISHED);
 	// Send message
 	m_pTarget->PostMessage(&msg);
-/*
-    if(m_SvnError)
-    {
-		// Create a message
-		BMessage msg('MERR');
-		
-		// Add text to message
-		msg.AddString("text", "operation finished...");
-				
-		// Send message
-		m_pTarget->PostMessage(&msg);
-    }
-*/    
 }

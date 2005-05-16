@@ -80,8 +80,11 @@ private:
 		// Description : Large icon that represents the svn command
 		// Init        : By cons
 		
-	int m_Pipes[2];
+	int m_StdoutPipes[2];
 		// Description : pipes for reading standard output
+
+	int m_StderrPipes[2];
+		// Description : pipes for reading error output
 	
 	std::string m_strCommand;
 		// Description : string that represents the command line  

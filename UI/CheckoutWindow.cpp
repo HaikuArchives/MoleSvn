@@ -114,14 +114,7 @@ void CheckoutWindow::MessageReceived(BMessage *message)
 				m_pCmd->SetTarget(pWindow);
 
 				string cmd = string("svn checkout ") + m_pUrlRepository->Text() + " " + m_pCheckoutDirectory->Text();
-				int nError = m_pCmd->ExecuteSvn(string(cmd.c_str()));
-				TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Execute error = %d", nError));
-
-				if(nError)
-				{
-					ShowErrorWindow(string("checkout failed"));
-					pWindow->Quit();
-				}
+				/*int nError = */m_pCmd->ExecuteSvn(string(cmd.c_str()));
 								
 				PostMessage(B_QUIT_REQUESTED);
 			}

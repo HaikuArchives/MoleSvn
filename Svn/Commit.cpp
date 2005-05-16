@@ -6,7 +6,7 @@
 // Author      : cedric.bresson@artcoder.com
 #include "Commit.h"
 #include "../UI/ResultsWindow.h"
-
+#include "../UI/CommitWindow.h"
 
 using namespace std;
 
@@ -31,8 +31,13 @@ Commit::~Commit()
 void Commit::Execute()
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
+/*	
+	ResultsWindow* pWindow = new ResultsWindow(GetName());
+	m_pTarget = pWindow;
 	
-	new ResultsWindow(GetName());
+	ExecuteSvn(string("svn commit -m \"\" "));
+*/
+	new CommitWindow(this);	
 }
 
 

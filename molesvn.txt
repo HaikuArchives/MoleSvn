@@ -1,19 +1,9 @@
-Package:
-*** Utils ***
-- Logger
-	=> Clue OK
-- Utils
+TODO:
+mettre un mutex sur la variable m_nSvnError, ou alors trouver comment recuperer la vlauer de sortie d'un fork.
+=> on peut lire la valeur de m_SvnError lors du RetrieveOutput avant que le fork n'est termine !!!
+    => cas : checkout sur un repository faux
 
-*** Application ***
-- main
-
-*** UI ***
-
-*** Parser ***
-
-*** SVN ***
-
-
+Pb connexe a celui precedement cite, la sortie stdout ne genere rien dans le cas d'un checkout reussi en loca, pas le temps de voir les infos.
 
 Release
 v0.1:

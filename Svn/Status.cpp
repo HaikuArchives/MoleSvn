@@ -35,14 +35,7 @@ void Status::Execute()
 	ResultsWindow* pWindow = new ResultsWindow(GetName());
 	m_pTarget = pWindow;
 	
-	int nError = ExecuteSvn(string("svn status"));
-	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Execute error = %d", nError));
-
-	if(nError)
-	{
-		ShowErrorWindow(string("update failed"));
-		pWindow->Quit();
-	}
+	ExecuteSvn(string("svn status"));
 }
 
 

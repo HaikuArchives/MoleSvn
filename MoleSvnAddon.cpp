@@ -175,7 +175,7 @@ string MoleSvnAddon::GetEntryNameList() const
 	
 	while(ite != m_lstEntry.end())
 	{
-		strRes += string( (*ite).name ) + string(" ");		
+		strRes += string("\"") + string( (*ite).name ) + string("\" ");		
 		++ite;
 	}
 	
