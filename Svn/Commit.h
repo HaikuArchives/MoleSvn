@@ -12,6 +12,7 @@
 #include "Config.h"
 #include "SvnCommands.h"
 
+
 class Commit : public SvnCommand
 {
 public:

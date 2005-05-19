@@ -113,7 +113,7 @@ void CheckoutWindow::MessageReceived(BMessage *message)
 				ResultsWindow* pWindow = new ResultsWindow(m_pCmd->GetName());
 				m_pCmd->SetTarget(pWindow);
 
-				string cmd = string("svn checkout ") + m_pUrlRepository->Text() + " " + m_pCheckoutDirectory->Text();
+				string cmd = string("svn checkout \"") + m_pUrlRepository->Text() + string("\" \"") + m_pCheckoutDirectory->Text() + string("\"");
 				/*int nError = */m_pCmd->ExecuteSvn(string(cmd.c_str()));
 								
 				PostMessage(B_QUIT_REQUESTED);

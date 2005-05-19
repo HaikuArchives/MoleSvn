@@ -30,7 +30,7 @@ m_pCmd(pCmd)
 	BScreen screen;
 	BRect screenFrame = screen.Frame();
 	const float fWindowWidth = 600.0f;
-	const float fWindowHeight = 250.0f;
+	const float fWindowHeight = 300.0f;
 	MoveTo((screenFrame.Width() - fWindowWidth) / 2.0f, (screenFrame.Height() - fWindowHeight) / 2.0f);
 	ResizeTo(fWindowWidth, fWindowHeight);
 
@@ -64,8 +64,22 @@ void CommitWindow::MessageReceived(BMessage *message)
 				
 			ResultsWindow* pWindow = new ResultsWindow(m_pCmd->GetName());
 			m_pCmd->SetTarget(pWindow);
-
+			
 			string cmd = string("svn commit -m \"") + string(m_pTextView->Text()) + string("\"");
+			
+			// Check login and password
+			string strLogin(m_pLogin->Text());
+			string strPassword(m_pPassword->actualText());
+			if(strLogin.size())
+			{
+				cmd += string(" --username \"") + strLogin + string("\""); 
+				
+				if(strPassword.size())
+				{
+					cmd += string(" --password \"") + strPassword + string("\""); 
+				}
+			}
+			
 			/*int nError = */m_pCmd->ExecuteSvn(string(cmd.c_str()));
 								
 			PostMessage(B_QUIT_REQUESTED);
@@ -108,7 +122,7 @@ void CommitWindow::CreateView()
 	BRect TextViewRect(g_fSpaceToWindowBorder,
 	                   pStringView->Frame().bottom + g_fControlSpace,
 	                   Frame().Width() - (g_fSpaceToWindowBorder + B_V_SCROLL_BAR_WIDTH),
-	                   Frame().Height() - (g_fSpaceToWindowBorder + g_fButtonHeight + g_fSpaceToWindowBorder + B_H_SCROLL_BAR_HEIGHT) );
+	                   Frame().Height() - (g_fSpaceToWindowBorder + g_fButtonHeight + g_fControlSpace + 20 + g_fControlSpace + B_H_SCROLL_BAR_HEIGHT) );
 	BRect TextRect(0,0,TextViewRect.Width(), TextViewRect.Height());                   
 	m_pTextView = new BTextView(TextViewRect, 
 	                      		"CommitWindow_TextView",
@@ -124,10 +138,42 @@ void CommitWindow::CreateView()
 	                         		B_FRAME_EVENTS | B_FULL_UPDATE_ON_RESIZE,
 	                         		true,
 	                         		true));
+	
+	// Login
+	BRect LoginFrame(TextViewRect.left, 
+	                 TextViewRect.bottom + g_fControlSpace + B_H_SCROLL_BAR_HEIGHT, 
+	                 (TextViewRect.right - g_fControlSpace) / 2.0f, 
+	                 TextViewRect.bottom + g_fControlSpace + B_H_SCROLL_BAR_HEIGHT + 20);
+	m_pLogin = new BTextControl(LoginFrame,
+								"LoginTextControl",
+								"Login :",
+								"",
+								NULL,
+								B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM,
+	                            B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS | B_FULL_UPDATE_ON_RESIZE);
+	m_pLogin->SetDivider(LoginFrame.Width() * 0.25f);
+	pView->AddChild(m_pLogin);
+					
+							
+	BRect PasswordFrame((TextViewRect.right + g_fControlSpace) / 2.0f,
+  	                    LoginFrame.top, 
+ 	                    Frame().Width() - g_fSpaceToWindowBorder,
+	                    LoginFrame.bottom);
+	m_pPassword = new PassControl(PasswordFrame,
+								  "PasswordTextView",
+								  "Password :",
+								  "",
+							  	  NULL,
+								  B_FOLLOW_RIGHT | B_FOLLOW_BOTTOM,
+	                              B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS | B_FULL_UPDATE_ON_RESIZE);
+							  	  
+	m_pPassword->SetDivider(PasswordFrame.Width() * 0.25f);
+	pView->AddChild(m_pPassword);
+
 
 	// Ok button
 	float fButtonX = Frame().IntegerWidth() - (g_fButtonWidth + g_fSpaceToWindowBorder);
-	float fButtonY = Frame().IntegerHeight() - (g_fButtonHeight + g_fSpaceToWindowBorder);
+	float fButtonY = LoginFrame.bottom + g_fControlSpace;//Frame().IntegerHeight() - (g_fControlSpace + g_fButtonHeight + g_fSpaceToWindowBorder);
 	BButton* pOk = new BButton(BRect(fButtonX, fButtonY, fButtonX + g_fButtonWidth, fButtonY + g_fButtonHeight),
 		    				  "ResultsWindow_Ok", 
 	                          "Ok",

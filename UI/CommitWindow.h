@@ -11,6 +11,7 @@
 
 #include "../Config.h"
 #include "../Svn/SvnCommands.h"
+#include "../3rd/PassControl.h"
 
 class CommitWindow : public BWindow
 {
@@ -31,6 +32,8 @@ private:
 		
 	Commit* 	  m_pCmd;
 	BTextView* 	  m_pTextView;
+	BTextControl* m_pLogin;
+	PassControl*  m_pPassword;
 };
 
 

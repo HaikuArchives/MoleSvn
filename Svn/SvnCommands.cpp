@@ -94,7 +94,7 @@ int SvnCommand::ExecuteSvn(const string& strCommand)
 	// Create new pipes
     pipe(m_StdoutPipes); 
     pipe(m_StderrPipes); 
-    
+   
 	pid_t pid; 
     pid = fork();
     if(pid == -1)
@@ -129,15 +129,16 @@ int SvnCommand::ExecuteSvn(const string& strCommand)
 		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Svn returns : %d", m_SvnError));
 		exit(m_SvnError);
 	}
-
+/*
 	// Create a new thread
-//	m_SvnThreadId = spawn_thread(SpawnThread, "MoleSvnCommandThread", B_NORMAL_PRIORITY, this);
+	m_SvnThreadId = spawn_thread(SpawnThread, "MoleSvnCommandThread", B_NORMAL_PRIORITY, this);
 
-//	resume_thread(m_SvnThreadId);
+	resume_thread(m_SvnThreadId);
+*/
 
 	RetrieveSvnOutput();	
+/*
 
-/*	
 	int32 exitValue = 0;
 	if(m_SvnThreadId)
 	{
@@ -174,7 +175,36 @@ int32 SvnCommand::SpawnThread(void* arg)
 int32 SvnCommand::SvnCommandThread()
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
-	return 0;	
+	
+	// Close reading pipe
+	close(m_StdoutPipes[0]);
+	close(m_StderrPipes[0]);
+		
+	// Duplicate STDOUT adn STDERR to ours pipes
+	dup2(m_StdoutPipes[1], HF_STDOUT);
+	dup2(m_StderrPipes[1], HF_STDERR);
+		
+	// close our writing pipe, because we must have only one pipe open
+	// and STDOUT is already open
+	close(m_StdoutPipes[1]);
+	close(m_StderrPipes[1]);
+
+	// Execute command
+	//string strCmd = m_strCommand + string(" ") + MoleSvnAddon::GetInstance()->GetEntryNameList();
+	//TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Execute = %s", strCmd.c_str()));
+	//m_SvnError = execl(strCmd.c_str(), NULL);
+	//m_SvnError = system(strCmd.c_str());
+	printf("toto\n");
+	printf("toto\n");
+	printf("toto\n");
+	printf("toto\n");
+
+	close(HF_STDOUT);
+	close(HF_STDERR);
+				
+	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Svn returns : %d", m_SvnError));
+	
+	return m_SvnError;	
 }
 
 void SvnCommand::RetrieveSvnOutput()
