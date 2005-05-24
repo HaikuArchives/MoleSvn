@@ -1,10 +1,16 @@
 TODO:
 mettre un mutex sur la variable m_nSvnError, ou alors trouver comment recuperer la vlauer de sortie d'un fork.
+=> corriger
+
 => on peut lire la valeur de m_SvnError lors du RetrieveOutput avant que le fork n'est termine !!!
     => cas : checkout sur un repository faux
+=> corriger
 
-Pb connexe a celui precedement cite, la sortie stdout ne genere rien dans le cas d'un checkout reussi en loca, pas le temps de voir les infos.
+pb: command add sans selectionner des fichiers, dans un repertoire deja dans la base
+=> ne devrait pas arriver lorsque le menu sera dynamique
 
+Pb connexe a celui precedement cite, la sortie stdout ne genere rien dans le cas d'un checkout reussi en local, pas le temps de voir les infos.
+=> corriger avec le pb au dessus
 Release
 v0.1:
 - Affichage d'un menu
@@ -16,3 +22,13 @@ v0.1:
 - Affichage de messages SVN
 
 v0.2:
+*** Code ***
+
+*** Code 3rd party ****
+- Utiliser le singleton de Loki pour eviter la fuite memoire dans MoleSvnAddon
+- Utiliser MMgr pour verifier les fuites memoires
+
+*** Interface *****
+- Fenetre About :
+	- Mettre des URLs dans la fenetres About pour nos mails, homepage.
+	- Rajouter une image avec un logo de MoleSVN
