@@ -6,11 +6,12 @@ mettre un mutex sur la variable m_nSvnError, ou alors trouver comment recuperer 
     => cas : checkout sur un repository faux
 => corriger
 
+Pb connexe a celui precedement cite, la sortie stdout ne genere rien dans le cas d'un checkout reussi en local, pas le temps de voir les infos.
+=> corriger avec le pb au dessus
+
 pb: command add sans selectionner des fichiers, dans un repertoire deja dans la base
 => ne devrait pas arriver lorsque le menu sera dynamique
 
-Pb connexe a celui precedement cite, la sortie stdout ne genere rien dans le cas d'un checkout reussi en local, pas le temps de voir les infos.
-=> corriger avec le pb au dessus
 Release
 v0.1:
 - Affichage d'un menu
@@ -22,13 +23,33 @@ v0.1:
 - Affichage de messages SVN
 
 v0.2:
+*** Nouvelles commandes ***
+- Remove
+- Blame
+- Cleanup
+
+- Export
+- Import
+
 *** Code ***
+- Arreter l'execution de svn n'importe quand, un bon vieux kilage de thread en pleine gueule tu vas voir !! haha
+- he possible d'accelerer un peu l'affichage stdout, parce que c lent... m'enfin moi je dis ca je dis rien = voir setvbuf, le pb vient du fait que la sortie stdout par defaut est bufferee, sauf si executee dans un terminal
+- lorsque une erreur se produit, fermer la fenetre ResultWindow apres que l'AlertBox soit fermee. 
 
 *** Code 3rd party ****
-- Utiliser le singleton de Loki pour eviter la fuite memoire dans MoleSvnAddon
+- Utiliser le singleton de Loki pour eviter la fuite memoire dans MoleSvnAddon (je sais pas comment le tracker se comporte, vis a vis de l'image de l'add on)
 - Utiliser MMgr pour verifier les fuites memoires
+- Utiliser Boost pour le parse, et peut etre le signal/slot
 
 *** Interface *****
 - Fenetre About :
 	- Mettre des URLs dans la fenetres About pour nos mails, homepage.
 	- Rajouter une image avec un logo de MoleSVN
+
+v0.3:
+*** Code ***
+- Ajouter un systeme de preferences
+	- stocker les derniers messages de commit
+	- stocker les positions/dimensions des fenetres lors de la derniere execution
+	- stocker les derniers repository qui ont ete checkoutes
+- Refactoring du mecanisme d'execution des commandes svn, pour prendre en compte une gestion plus souple de l'interface

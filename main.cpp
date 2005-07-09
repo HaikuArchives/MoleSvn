@@ -18,7 +18,7 @@ using namespace std;
 
 void process_refs(entry_ref dir_ref, BMessage *msg, void *) 
 {
-	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD, "MoleSvn starts here!"));
+	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD, "MoleSvn v%d.%d starts here!", MOLESVN_MAJOR_VERSION,MOLESVN_MINOR_VERSION));
 	
 	try
 	{

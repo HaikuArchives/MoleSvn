@@ -116,7 +116,7 @@ int SvnCommand::ExecuteSvn(const string& strCommand)
 
 		// Execute command
 		string strCmd = m_strCommand + string(" ") + MoleSvnAddon::GetInstance()->GetEntryNameList();
-		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Execute = %s", strCmd.c_str()));
+		//TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Execute = %s", strCmd.c_str()));
 		//int err = execl(strCmd.c_str(), NULL);
 		int err = system(strCmd.c_str());
 		

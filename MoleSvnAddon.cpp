@@ -241,5 +241,5 @@ std::string MoleSvnAddon::GetAddonFilename()
 		throw ImageException(image);	
 	}
 	
-	return std::string(&info.name[0]);
+	return std::string(info.name);
 }

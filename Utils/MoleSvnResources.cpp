@@ -19,7 +19,7 @@ MoleSvnResources::MoleSvnResources(BFile* pFile)
 	{
 		delete m_pResources;
 		m_pResources = NULL;
-		throw MoleSvnException(string("cannot initilize resources"));	
+		throw MoleSvnException(string("cannot initialize resources"));	
 	}
 }
 		
@@ -40,13 +40,15 @@ void MoleSvnResources::LoadIcon(type_code type, MoleSvnIcons iconId, BBitmap** p
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 	// Check if the resource exits
 	if(!m_pResources->HasResource(type, iconId))
+	//if(!m_pResources->HasResource('BBMP', iconId))
 	{
 		throw ResourceNotFoundException(iconId);
 	}
 
 	// Load icons from ressource file
 	size_t len;
-	const void *data = m_pResources->LoadResource(type, iconId, &len);	
+	const void *data = m_pResources->LoadResource(type, iconId, &len);
+	//const void *data = m_pResources->LoadResource('BBMP', iconId, &len);
 	BRect dim(0,0,15,15);
 	if(type == 'ICON')
 	{
@@ -56,6 +58,8 @@ void MoleSvnResources::LoadIcon(type_code type, MoleSvnIcons iconId, BBitmap** p
 	
 	*pDest = new BBitmap(dim, B_CMAP8);
 	(*pDest)->SetBits(data, len, 0, B_CMAP8);
+	//*pDest = new BBitmap(dim, B_RGB32);
+	//(*pDest)->SetBits(data, len, 0, B_RGB32);
 }
 
 
