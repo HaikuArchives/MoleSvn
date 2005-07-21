@@ -10,7 +10,20 @@
 #include "../MoleSvnAddon.h"
 #include "MessageCommands.h"
 
+#if defined(USE_CLV)
+#	if defined(B_ZETA_VERSION)
+#		include <interface/ColumnTypes.h>
+#	else // BEOS
+#		include <experimental/ColumnTypes.h>
+		using namespace BExperimental;
+#	endif // ZETA
+#endif //USE_CLV
+
+//#include <boost/algorithm/string.hpp>
+
 using namespace std;
+//using namespace boost;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // -- ResultsWindow
@@ -91,17 +104,42 @@ ResultsView::ResultsView(BRect frame)
 	   B_FRAME_EVENTS | B_FULL_UPDATE_ON_RESIZE)
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
-	
+#if defined(USE_CLV)
+	// ColumnListView
+	BRect ListViewRect(g_fSpaceToWindowBorder,
+	                   g_fSpaceToWindowBorder,
+	                   frame.Width() - (g_fSpaceToWindowBorder),
+	                   frame.Height() - (g_fSpaceToWindowBorder + g_fButtonHeight + g_fSpaceToWindowBorder) );
+	                   
+	m_pListView = new BColumnListView(ListViewRect, 
+		                              "ResultWindow_ListView",
+	                            	  B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP_BOTTOM,
+	                            	  B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS | B_FULL_UPDATE_ON_RESIZE,
+	                            	  B_FANCY_BORDER);
+
+	BColumn* pColumn1 = new BStringColumn("Action", 50.0f, 10.0f, 1000.0f, 0);
+	BColumn* pColumn2 = new BStringColumn("File", 300.0f, 10.0f, 1000.0f, 0);
+	//BColumn* pColumn3 = new BStringColumn("Mime-type", 300.0f, 10.0f, 1000.0f, 0);
+	m_pListView->AddColumn(pColumn1,0);
+	m_pListView->AddColumn(pColumn2,1);
+	//m_pListView->AddColumn(pColumn3,2);
+	m_pListView->SetSortingEnabled(false);
+
+	AddChild(m_pListView);
+#else
+	   
 	// ListView
 	BRect ListViewRect(g_fSpaceToWindowBorder,
 	                   g_fSpaceToWindowBorder,
 	                   frame.Width() - (g_fSpaceToWindowBorder + B_V_SCROLL_BAR_WIDTH),
 	                   frame.Height() - (g_fSpaceToWindowBorder + g_fButtonHeight + g_fSpaceToWindowBorder + B_H_SCROLL_BAR_HEIGHT) );
+	                   
 	m_pListView = new BListView(ListViewRect, 
 	                            "ResultWindow_ListView",
 	                            B_SINGLE_SELECTION_LIST,
 	                            B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP_BOTTOM,
 	                            B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS | B_FULL_UPDATE_ON_RESIZE);
+	                            
 
 	AddChild(new BScrollView("ResultWindows_ScrollView", 
 	                         m_pListView,
@@ -109,6 +147,7 @@ ResultsView::ResultsView(BRect frame)
 	                         B_FRAME_EVENTS | B_FULL_UPDATE_ON_RESIZE,
 	                         true,
 	                         true));
+#endif //USE_CLV
 
 	// Ok button
 	float fButtonX = frame.IntegerWidth() - (g_fButtonWidth + g_fSpaceToWindowBorder);
@@ -146,6 +185,41 @@ BButton* ResultsView::GetOkButton()
 
 void ResultsView::AddItem(const std::string& strText)
 {
+	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "AddItem : %s", strText.c_str()));
+
+#if defined(USE_CLV)
+	// Retrieve the first word for the action column
+	int nIndex = strText.find(' ');
+	string strColumn0(strText.substr(0, nIndex-1));
+	
+	bool bIsAction = CheckAction(strColumn0);
+	
+	string strColumn1;
+	if(bIsAction)
+	{
+		// Retrieve file name (with the path)
+		strColumn1 = strText.substr(nIndex);
+		//trim_left(strFile);
+		
+		// Retrieve icon of the file
+	
+		// Retrieve mime type of the file
+	}
+	else
+	{
+		// It's not a file
+		strColumn1 = strText;
+	}
+	
+	// ColumnListView
+	BRow* pRow = new BRow();
+//	m_pListView->SetHighColor(g_colModifiedAction);
+	pRow->SetField(new BStringField(strColumn0.c_str()), 0);
+	pRow->SetField(new BStringField(strColumn1.c_str()), 1);
+	//pRow->SetField(new BStringField("mime"), 2);
+	m_pListView->AddRow(pRow);
+#else
+	// ListView
 	m_pListView->AddItem(new BStringItem(strText.c_str()));
 	int nItems = m_pListView->CountItems();
 	
@@ -160,6 +234,48 @@ void ResultsView::AddItem(const std::string& strText)
 		m_pListView->Select(nItems-1);
 		m_pListView->ScrollToSelection();
 	}
+#endif //USE_CLV
+}
+
+bool ResultsView::CheckAction(string& strAction)
+{
+//    A  Added
+//    D  Deleted
+//    U  Updated
+//    C  Conflict
+//    G  Merged 
+	bool bIsAction = false;
+	if(strAction == "A")
+	{
+		strAction == "Added";
+		bIsAction = true;
+	}
+	else if(strAction == "D")
+	{
+		strAction == "Deleted";
+		bIsAction = true;
+	}
+	else if(strAction == "U")
+	{
+		strAction == "Updated";
+		bIsAction = true;
+	}
+	else if(strAction == "C")
+	{
+		strAction == "Conflict";
+		bIsAction = true;
+	}
+	else if(strAction == "G")
+	{
+		strAction == "Merged";
+		bIsAction = true;
+	}
+	else
+	{
+		strAction = "";
+	}
+	
+	return bIsAction;
 }
 
 

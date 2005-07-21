@@ -69,6 +69,9 @@ private:
 		// Remarks     : we must have this function to open ressource in the addon file, and the
 		//               user can change the addon name (like for shortcut)
 		
+	bool HasRepository();
+		// Description : returns True if the current directory has a svn repository (.svn)
+		
 	entry_ref m_CurrentDirectory;
 		// Description : entry_ref from where the user launchs the addon
 		// Init        : By cons

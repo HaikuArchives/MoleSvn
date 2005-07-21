@@ -45,8 +45,9 @@ void process_refs(entry_ref dir_ref, BMessage *msg, void *)
 		pView->GetMouse(&MousePosition, &nButtons);
 		pView->ConvertToScreen(&MousePosition);
 		pWindow->Quit();
-		MousePosition.x -= 10;
-		MousePosition.y -= 10;
+		// See the talkback of BiPolar about the MoleSVN call from the shortcut
+		//MousePosition.x -= 10;
+		//MousePosition.y -= 10;
 		TRACE_OBJECT ((CC_APPLICATION, CR_OBJECT, &MousePosition, "Mouse position"));
 		
 		// Show the menu, depending of the selected files 

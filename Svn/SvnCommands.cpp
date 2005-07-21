@@ -4,16 +4,17 @@
 // File        : SvnCommand.cpp
 // Description : defines the SvnCommand class, the commands send to svn
 // Author      : cedric.bresson@artcoder.com
+///////////////////////////////////////////////////////////////////////////////
 #include "SvnCommands.h"
 #include <stdlib.h>
 #include <string.h> 
 #include <fstream.h> 
 #include <unistd.h>
-#include <io.h> 
+//#include <io.h> 
 
 using namespace std;
 
-#define HF_STDIN 0
+#define HF_STDIN  0
 #define HF_STDOUT 1
 #define HF_STDERR 2
 
@@ -81,10 +82,11 @@ BBitmap* SvnCommand::GetLargeIcon() const
 	return m_pLargeIcon;
 }
 
-#include <unistd.h>
-#include <sys/wait.h>
-#include <signal.h>
-#include <iostream>
+//#include <unistd.h>
+//#include <sys/wait.h>
+//#include <signal.h>
+//#include <iostream>
+
 ///////////////////////////////////////////////////////////////////////////////
 // -- Protected
 ///////////////////////////////////////////////////////////////////////////////
@@ -94,6 +96,8 @@ int SvnCommand::ExecuteSvn(const string& strCommand)
 	
 	m_strCommand = strCommand;
 
+	//setvbuf(stdout,(char*)NULL,_IOLBF,0);
+	
 	// Create new pipes
     pipe(m_StdoutPipes); 
     pipe(m_StderrPipes); 
@@ -110,16 +114,25 @@ int SvnCommand::ExecuteSvn(const string& strCommand)
 		close(m_StdoutPipes[0]);
 		close(m_StderrPipes[0]);
 		
-		// Duplicate STDOUT adn STDERR to ours pipes
+		// Duplicate STDOUT and STDERR to ours pipes
 		dup2(m_StdoutPipes[1], HF_STDOUT);
 		dup2(m_StderrPipes[1], HF_STDERR);
 
 		// Execute command
 		string strCmd = m_strCommand + string(" ") + MoleSvnAddon::GetInstance()->GetEntryNameList();
-		//TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Execute = %s", strCmd.c_str()));
+		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Execute = %s", strCmd.c_str()));
 		//int err = execl(strCmd.c_str(), NULL);
 		int err = system(strCmd.c_str());
-		
+/*		
+		int err = 0;
+		printf("1\n");
+		printf("2\n");
+		printf("3\n");
+		printf("4\n");
+		printf("5\n");
+		printf("6\n");
+		printf("7\n");
+*/	
 		// close our writing pipe, because we must have only one pipe open
 		// and STDOUT is already open
 		close(m_StdoutPipes[1]);
@@ -159,17 +172,59 @@ int SvnCommand::RetrieveSvnOutput()
 	close(m_StderrPipes[1]);
 
 	// Read the pipe 0
-    char Line[128]; 
+	const int Buffer_Max = 512;
+    char Line[Buffer_Max]; 
+#define MOLESVN_USE_IFSTREAM
+#if defined(MOLESVN_USE_IFSTREAM)    
     ifstream R(m_StdoutPipes[0]); 
+#else
+
+#endif //MOLESVN_USE_IFSTREAM
+    
     bool bHasMessage = false;
     
     string strTmp;
 	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Reading pipe..."));
 	do
     { 
-		R.getline(Line,sizeof(Line)); 
-		
+#if defined(MOLESVN_USE_IFSTREAM)
+/*
+		string strLine;
+		strTmp = string();
+		streamsize ssize;
+		do
+		{
+			R.getline(Line, Buffer_Max);
+			strLine = string(Line);
+			ssize = R.gcount();
+			TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, " string.size() = %d", strLine.size()));			
+			TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, " ssize = %d", ssize));			
+			strTmp += strLine;	
+		}
+		while(strLine.size() == Buffer_Max);
+*/
+		R.getline(Line, Buffer_Max);
+		strTmp = string(Line);	
+
+#else
+		fd_set rds;
+		FD_ZERO(&rds);
+		FD_SET(fileno(m_StdoutPipes),&rds);
+		int ret=select(fileno(m_StdoutPipes)+1,&rds,0,0,0);
+//		if(ret<0)
+//	       throw AhuException("Error waiting on data from coprocess: "+stringerror());
+//		if(!ret)
+//			throw AhuException("Timeout waiting for data from coprocess");
+ 
+		fgets(Line,sizeof(Line),m_StdoutPipes[0]);
+//			throw AhuException("Child closed pipe");
+
+		char *p;
+		if((p=strrchr(Line,'\n')))
+		*p=0;
 		strTmp = string(Line);
+#endif //MOLESVN_USE_IFSTREAM		
+		
 		// check if the line is not empty
 		if(strTmp.size() > 0)
 		{	

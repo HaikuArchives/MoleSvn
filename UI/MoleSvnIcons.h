@@ -17,6 +17,12 @@ enum MoleSvnIcons
 	R_Checkout = 1004,
 	R_Status   = 1005,
 	R_About    = 1006,
+	R_Delete   = 1007,
+	R_Blame    = 1008,
+	R_Cleanup  = 1009,
+	R_Resolved = 1010,
+	R_Revert   = 1011,
+	
 };
 
 #endif //__MoleSvnIcons_h__

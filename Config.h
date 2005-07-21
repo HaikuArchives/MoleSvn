@@ -21,9 +21,11 @@
 #include "Utils/Exception.h"
 #include "Utils/Utils.h"
 
+//#include "3rd/mmgr/mmgr.h"	// Enable mmgr
+
 // Current MoleSVN version
 #define MOLESVN_MAJOR_VERSION 0
-#define MOLESVN_MINOR_VERSION 1
+#define MOLESVN_MINOR_VERSION 2
 
 
 // UI constants
@@ -33,5 +35,9 @@ const float g_fStringViewHeight = 15.0f;	// Height of string views
 const float g_fControlSpace = 20.0f;        // Space between controls
 const float g_fButtonsSpace = 20.0f;		// Space between buttons
 const float g_fSpaceToWindowBorder = 20.0f;	// Space between control and window border 
+
+// Action colors
+const rgb_color g_colDefaultAction = {0, 0, 0, 255};
+const rgb_color g_colModifiedAction = {0, 255, 0, 255};
 
 #endif //__Config_h__

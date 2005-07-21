@@ -10,6 +10,8 @@
 #include "Exception.h"
 #include "../MoleSvnAddon.h"
 
+using namespace std;
+
 MoleSvnResources::MoleSvnResources(BFile* pFile)
 :m_pResources(NULL)
 {

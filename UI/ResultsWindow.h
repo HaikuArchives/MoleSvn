@@ -12,6 +12,18 @@
 
 #include <string>
 
+
+//#define USE_CLV
+
+#if defined(USE_CLV)
+#	if defined(B_ZETA_VERSION)
+#		include <interface/ColumnListView.h>
+#	else // BEOS
+#		include <experimental/ColumnListView.h>
+#	endif // ZETA
+#endif //USE_CLV
+
+
 class ResultsView : public BView
 {
 public:
@@ -29,9 +41,29 @@ public:
 	
 	// -- Services ------------------------------------------------------------
 	void AddItem(const std::string& strText);
+		// Description : Add an item to the list
+		// Remarks     : it will split the string and convert the string into 
+		//               human readable string
+	
 private:
+	// -- Misc ----------------------------------------------------------------
+	bool CheckAction(std::string& strAction);
+		// Description : check if the string strAction is an action 
+		//               and convert it in a human readable string (U => Updated, ...)
+		// Remakrs     : If it's not an actino, it returns false and strAction
+		//	             is set to empty string 
+
+#if defined(USE_CLV)
+#	if defined(B_ZETA_VERSION)
+		BColumnListView* m_pListView;
+#	else // BEOS
+		BExperimental::BColumnListView* m_pListView;
+#	endif // ZETA
+	
+#else	
 	BListView* m_pListView;
 		// Temporary, must be CLV
+#endif //USE_CLV		
 	
 	BButton* m_pOk;
 		// Description : ok button

@@ -16,6 +16,11 @@ enum MessageCommand
 	MSG_COMMIT   	  = 'MCOM',
 	MSG_STATUS   	  = 'MSTA',
 	MSG_ABOUT    	  = 'MABO',
+	MSG_DELETE        = 'MDEL',
+	MSG_BLAME         = 'MBLA',
+	MSG_CLEANUP       = 'MCLE',
+	MSG_RESOLVED      = 'MRES',
+	MSG_REVERT        = 'MREV',
 
 	MSG_OK            = 'M_OK',
 	MSG_CANCEL   	  = 'MCAN',

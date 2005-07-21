@@ -8,12 +8,11 @@
 #ifndef __Exception_h__
 #define __Exception_h__
 
-#include <string>
-#include <stdexcept>
-
-#include "../Config.h"
 #include "Utils.h"
 #include "../UI/MoleSvnIcons.h"
+
+#include <string>
+#include <stdexcept>
 
 // Description : based class for all molesvn exceptions 
 class MoleSvnException : public std::runtime_error
@@ -53,7 +52,7 @@ public:
 class FileNotFound : public MoleSvnException
 {
 public:
-	FileNotFound(const std::string& strMsg):MoleSvnException(string("file not found : ") + strMsg){};
+	FileNotFound(const std::string& strMsg):MoleSvnException(std::string("file not found : ") + strMsg){};
 };
 
 #endif //__Exception_h__

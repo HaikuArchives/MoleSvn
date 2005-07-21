@@ -30,7 +30,7 @@ public:
 	// -- Services ------------------------------------------------------------
 	virtual void Execute() = 0;
 		// Description : executes the svn command
-		// Remarks     : svn commands must overide this function and launch the
+		// Remarks     : svn commands must overide this function to launch the
 		//               corresponding command
 
 	// -- Hooks ---------------------------------------------------------------
@@ -99,6 +99,11 @@ protected:
 #include "Checkout.h"
 #include "Status.h"
 #include "About.h"
+#include "Delete.h"
+#include "Blame.h"
+#include "Cleanup.h"
+#include "Resolved.h"
+#include "Revert.h"
 
 
 #endif //__SvnCommand_h__

@@ -65,7 +65,7 @@ void CommitWindow::MessageReceived(BMessage *message)
 			ResultsWindow* pWindow = new ResultsWindow(m_pCmd->GetName());
 			m_pCmd->SetTarget(pWindow);
 			
-			string cmd = string("svn commit -m \"") + string(m_pTextView->Text()) + string("\"");
+			string cmd = string("svn commit --message \"") + string(m_pTextView->Text()) + string("\" --force-log");
 			
 			// Check login and password
 			string strLogin(m_pLogin->Text());
@@ -129,8 +129,8 @@ void CommitWindow::CreateView()
 	                            TextRect,
 	                            B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP_BOTTOM,
 	                            B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS | B_FULL_UPDATE_ON_RESIZE);
-	m_pTextView->MakeFocus(true);
 	m_pTextView->MakeSelectable(true);
+	m_pTextView->MakeFocus(true);
 
 	pView->AddChild(new BScrollView("CommitWindow_ScrollView", 
 	       		                    m_pTextView,
@@ -154,7 +154,8 @@ void CommitWindow::CreateView()
 	m_pLogin->SetDivider(LoginFrame.Width() * 0.25f);
 	pView->AddChild(m_pLogin);
 					
-							
+	
+	// Password						
 	BRect PasswordFrame((TextViewRect.right + g_fControlSpace) / 2.0f,
   	                    LoginFrame.top, 
  	                    Frame().Width() - g_fSpaceToWindowBorder,
@@ -179,6 +180,7 @@ void CommitWindow::CreateView()
 	                          "Ok",
 	                          new BMessage(MSG_OK),
 	                          B_FOLLOW_RIGHT | B_FOLLOW_BOTTOM);
+	//pOk->MakeDefault(true);	                          
 	pView->AddChild(pOk);
 
 	// Cancel button

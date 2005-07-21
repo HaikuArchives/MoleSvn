@@ -188,19 +188,49 @@ string MoleSvnAddon::GetEntryNameList() const
 BPopUpMenu* MoleSvnAddon::CreateMenu()
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
+	
+	bool bHasRepo = HasRepository();
+	bool bHasSelectedFiles = m_lstEntry.size();
 
 	// Create the menu
 	BPopUpMenu* pMenu = new BPopUpMenu("menu");
-	pMenu->AddItem(new IconMenuItem(new Update()));
-	pMenu->AddItem(new IconMenuItem(new Commit()));
-	pMenu->AddSeparatorItem();
-	pMenu->AddItem(new IconMenuItem(new Checkout()));
-	pMenu->AddSeparatorItem();
-	pMenu->AddItem(new IconMenuItem(new Add()));
-	pMenu->AddSeparatorItem();
-	pMenu->AddItem(new IconMenuItem(new Status()));
-	pMenu->AddSeparatorItem();
+	if(!bHasRepo && !bHasSelectedFiles)
+	{
+		pMenu->AddItem(new IconMenuItem(new Checkout()));
+		pMenu->AddSeparatorItem();
+	}
+	if(bHasSelectedFiles || bHasRepo)
+	{
+		pMenu->AddItem(new IconMenuItem(new Update()));
+		pMenu->AddItem(new IconMenuItem(new Commit()));
+		pMenu->AddSeparatorItem();
+	}
+	
+	if(bHasRepo && bHasSelectedFiles)
+	{
+		pMenu->AddItem(new IconMenuItem(new Add()));
+		pMenu->AddItem(new IconMenuItem(new Delete()));
+		pMenu->AddItem(new IconMenuItem(new Revert()));	
+		pMenu->AddSeparatorItem();
+	}
+			
+	if(bHasSelectedFiles)
+	{
+		pMenu->AddItem(new IconMenuItem(new Cleanup()));
+		pMenu->AddItem(new IconMenuItem(new Resolved()));	
+		pMenu->AddSeparatorItem();
+	}
+	
+	if( (!bHasRepo && bHasSelectedFiles) || bHasRepo)
+	{
+		pMenu->AddItem(new IconMenuItem(new Status()));
+		pMenu->AddSeparatorItem();
+	}
+	
 	pMenu->AddItem(new IconMenuItem(new About()));
+
+//	pMenu->AddItem(new IconMenuItem(new Blame()));
+	// Add the cleanup menu only if the user has selected files
 
 	// returns the popupmenu
 	return pMenu;
@@ -243,3 +273,11 @@ std::string MoleSvnAddon::GetAddonFilename()
 	
 	return std::string(info.name);
 }
+
+bool MoleSvnAddon::HasRepository()
+{
+	BEntry entry; 
+	BDirectory dir(&m_CurrentDirectory);
+	return (dir.FindEntry(".svn", &entry) == B_OK);
+}
+
