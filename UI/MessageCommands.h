@@ -21,6 +21,7 @@ enum MessageCommand
 	MSG_CLEANUP       = 'MCLE',
 	MSG_RESOLVED      = 'MRES',
 	MSG_REVERT        = 'MREV',
+	MSG_RENAME        = 'MREN',
 
 	MSG_OK            = 'M_OK',
 	MSG_CANCEL   	  = 'MCAN',

@@ -1,25 +1,24 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Application : MoleSVN
 // Package     : Svn
-// File        : Resolved.cpp
-// Description : implements the Resolved command class
+// File        : Rename.cpp
+// Description : implements the Rename command class
 // Author      : cedric.bresson@artcoder.com
-#include "Resolved.h"
-#include "../UI/ResultsWindow.h"
-
+#include "Rename.h"
+#include "../UI/RenameWindow.h"
 
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
 // -- Life-cycle
 ///////////////////////////////////////////////////////////////////////////////
-Resolved::Resolved()
-:SvnCommand("Resolved", MSG_RESOLVED, R_Resolved)
+Rename::Rename()
+:SvnCommand("Rename", MSG_RENAME, R_Rename)
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 }
 
-Resolved::~Resolved()
+Rename::~Rename()
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 }
@@ -28,13 +27,11 @@ Resolved::~Resolved()
 ///////////////////////////////////////////////////////////////////////////////
 // -- Services
 ///////////////////////////////////////////////////////////////////////////////
-void Resolved::Execute()
+void Rename::Execute()
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
-	
-	m_pTarget = new ResultsWindow(GetName());
-	
-	ExecuteSvn(string("svn resolved --recursive ") + MoleSvnAddon::GetInstance()->GetEntryNameList());	
+
+	new RenameWindow(this);	
 }
 
 

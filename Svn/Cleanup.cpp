@@ -34,7 +34,7 @@ void Cleanup::Execute()
 	
 	m_pTarget = new ResultsWindow(GetName());
 	
-	ExecuteSvn(string("svn cleanup"));	
+	ExecuteSvn(string("svn cleanup ") + MoleSvnAddon::GetInstance()->GetEntryNameList());	
 }
 
 

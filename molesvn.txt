@@ -9,13 +9,11 @@ mettre un mutex sur la variable m_nSvnError, ou alors trouver comment recuperer 
 Pb connexe a celui precedement cite, la sortie stdout ne genere rien dans le cas d'un checkout reussi en local, pas le temps de voir les infos.
 => corriger avec le pb au dessus
 
-pb: 
-=> ne devrait pas arriver lorsque le menu sera dynamique
-
 pb resolu avec un menu dynamique:
 	- command add sans selectionner des fichiers, dans un repertoire deja dans la base
 	- delete sans selectionner de fichiers dans un repertoire
 	- cleanup en selectionnant des fichiers => seulement sur des repertoires
+
 
 
 
@@ -40,25 +38,23 @@ v0.2:
 
 *** Code ***
 - Arreter l'execution de svn n'importe quand, un bon vieux kilage de thread en pleine gueule tu vas voir !! haha
-- he possible d'accelerer un peu l'affichage stdout, parce que c lent... m'enfin moi je dis ca je dis rien = voir setvbuf, le pb vient du fait que la sortie stdout par defaut est bufferee, sauf si executee dans un terminal
+- he possible d'accelerer un peu l'affichage stdout, parce que c lent... m'enfin moi je dis ca je dis rien = voir setvbuf, le pb vient du fait que la sortie stdout par defaut est bufferee, sauf si executee dans un terminal (pty)
 - lorsque une erreur se produit, fermer la fenetre ResultWindow apres que l'AlertBox soit fermee. 
 - checker que les logins/password ne sont pas que des espaces !!
+- changer le type de ressources des icones en bitmap (voir si c'est possible avec les menu) pour reduire la taille de l'addon.
 
 *** Code 3rd party ****
 - Utiliser le singleton de Loki pour eviter la fuite memoire dans MoleSvnAddon (je sais pas comment le tracker se comporte, vis a vis de l'image de l'add on)
 - Utiliser MMgr pour verifier les fuites memoires
-- Utiliser Boost pour le parse, et peut etre le signal/slot
+- Utiliser Boost pour le parse
 
 *** Interface *****
 - Fenetre About :
-	- Mettre des URLs dans la fenetres About pour nos mails, homepage.
+	- Mettre des URLs dans la fenetre About pour nos mails, homepage.
 	- Rajouter une image avec un logo de MoleSVN
 
-- Fenetre checkout:
-	- rajouter la possibilite de specifier un login / password
-
 - General
-	- ameliorer la navigation a la souris. pouvoir faire rapidement au clavier, sans avoir a touche la souris (commit notamment).
+	- ameliorer la navigation a la souris. pouvoir tout faire rapidement au clavier, sans avoir a touche la souris (commit notamment).
 
 v0.3:
 *** Code ***

@@ -104,6 +104,7 @@ protected:
 #include "Cleanup.h"
 #include "Resolved.h"
 #include "Revert.h"
+#include "Rename.h"
 
 
 #endif //__SvnCommand_h__

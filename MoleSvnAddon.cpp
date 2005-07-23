@@ -194,7 +194,7 @@ BPopUpMenu* MoleSvnAddon::CreateMenu()
 
 	// Create the menu
 	BPopUpMenu* pMenu = new BPopUpMenu("menu");
-	if(!bHasRepo && !bHasSelectedFiles)
+	if(!bHasRepo)
 	{
 		pMenu->AddItem(new IconMenuItem(new Checkout()));
 		pMenu->AddSeparatorItem();
@@ -211,6 +211,9 @@ BPopUpMenu* MoleSvnAddon::CreateMenu()
 		pMenu->AddItem(new IconMenuItem(new Add()));
 		pMenu->AddItem(new IconMenuItem(new Delete()));
 		pMenu->AddItem(new IconMenuItem(new Revert()));	
+		// if the user has selected only one file
+		if(m_lstEntry.size() == 1)
+			pMenu->AddItem(new IconMenuItem(new Rename()));	
 		pMenu->AddSeparatorItem();
 	}
 			
@@ -230,7 +233,7 @@ BPopUpMenu* MoleSvnAddon::CreateMenu()
 	pMenu->AddItem(new IconMenuItem(new About()));
 
 //	pMenu->AddItem(new IconMenuItem(new Blame()));
-	// Add the cleanup menu only if the user has selected files
+
 
 	// returns the popupmenu
 	return pMenu;

@@ -35,7 +35,7 @@ void Status::Execute()
 	ResultsWindow* pWindow = new ResultsWindow(GetName());
 	m_pTarget = pWindow;
 	
-	ExecuteSvn(string("svn status"));
+	ExecuteSvn(string("svn status ") + MoleSvnAddon::GetInstance()->GetEntryNameList());
 }
 
 

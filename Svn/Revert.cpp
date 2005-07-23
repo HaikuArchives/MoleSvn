@@ -34,7 +34,7 @@ void Revert::Execute()
 	
 	m_pTarget = new ResultsWindow(GetName());
 	
-	ExecuteSvn(string("svn revert --recursive "));	
+	ExecuteSvn(string("svn revert --recursive " + MoleSvnAddon::GetInstance()->GetEntryNameList()));	
 }
 
 

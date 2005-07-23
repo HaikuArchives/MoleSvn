@@ -34,7 +34,7 @@ void Add::Execute()
 	
 	m_pTarget = new ResultsWindow(GetName());
 	
-	ExecuteSvn(string("svn add"));	
+	ExecuteSvn(string("svn add ") + MoleSvnAddon::GetInstance()->GetEntryNameList());	
 }
 
 

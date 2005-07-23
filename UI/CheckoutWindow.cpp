@@ -180,8 +180,8 @@ void CheckoutWindow::CreateView()
 									    "UrlRepositoryTextControl",
 									    "URL of repository",
 									    //"http://svn.collab.net/repos/tortoisesvn/trunk",
-									    "http://tortoisesvn.tigris.org/svn/tortoisesvn/trunk",
-									    //NULL,
+									    //"http://tortoisesvn.tigris.org/svn/tortoisesvn/trunk",
+									    NULL,
 									    NULL);
 	m_pUrlRepository->SetDivider(UrlRepoFrame.Width() * 0.30f);
 	pRepositoryBBox->AddChild(m_pUrlRepository);

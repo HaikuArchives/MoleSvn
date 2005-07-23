@@ -119,10 +119,9 @@ int SvnCommand::ExecuteSvn(const string& strCommand)
 		dup2(m_StderrPipes[1], HF_STDERR);
 
 		// Execute command
-		string strCmd = m_strCommand + string(" ") + MoleSvnAddon::GetInstance()->GetEntryNameList();
-		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Execute = %s", strCmd.c_str()));
-		//int err = execl(strCmd.c_str(), NULL);
-		int err = system(strCmd.c_str());
+		//TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Execute = %s", strCommand.c_str()));
+		//int err = execl(strCommand.c_str(), NULL);
+		int err = system(m_strCommand.c_str());
 /*		
 		int err = 0;
 		printf("1\n");
@@ -291,7 +290,7 @@ int SvnCommand::RetrieveSvnOutput()
 		BMessage msg(MSG_SVN_STDOUT);
 		
 		// Add text to message
-		msg.AddString("text", "operation finished.");
+		msg.AddString("text", "Operation finished.");
 				
 		// Send message
 		m_pTarget->PostMessage(&msg);

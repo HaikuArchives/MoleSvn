@@ -35,7 +35,7 @@ void Update::Execute()
 	ResultsWindow* pWindow = new ResultsWindow(GetName());
 	m_pTarget = pWindow;
 	
-	ExecuteSvn(string("svn update"));
+	ExecuteSvn(string("svn update ") + MoleSvnAddon::GetInstance()->GetEntryNameList());
 }
 
 

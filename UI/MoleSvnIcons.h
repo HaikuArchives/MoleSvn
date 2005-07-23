@@ -22,6 +22,7 @@ enum MoleSvnIcons
 	R_Cleanup  = 1009,
 	R_Resolved = 1010,
 	R_Revert   = 1011,
+	R_Rename   = 1012,
 	
 };
 

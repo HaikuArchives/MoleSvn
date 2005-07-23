@@ -80,6 +80,8 @@ void CommitWindow::MessageReceived(BMessage *message)
 				}
 			}
 			
+			cmd +=  string(" ") + MoleSvnAddon::GetInstance()->GetEntryNameList();
+			
 			/*int nError = */m_pCmd->ExecuteSvn(string(cmd.c_str()));
 								
 			PostMessage(B_QUIT_REQUESTED);
