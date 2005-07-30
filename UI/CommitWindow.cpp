@@ -69,7 +69,7 @@ void CommitWindow::MessageReceived(BMessage *message)
 			
 			// Check login and password
 			string strLogin(m_pLogin->Text());
-			string strPassword(m_pPassword->actualText());
+			string strPassword(m_pPassword->Text());
 			if(strLogin.size())
 			{
 				cmd += string(" --username \"") + strLogin + string("\""); 
@@ -162,7 +162,7 @@ void CommitWindow::CreateView()
   	                    LoginFrame.top, 
  	                    Frame().Width() - g_fSpaceToWindowBorder,
 	                    LoginFrame.bottom);
-	m_pPassword = new PassControl(PasswordFrame,
+	m_pPassword = new BTextControl(PasswordFrame,
 								  "PasswordTextView",
 								  "Password :",
 								  "",
@@ -171,6 +171,7 @@ void CommitWindow::CreateView()
 	                              B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS | B_FULL_UPDATE_ON_RESIZE);
 							  	  
 	m_pPassword->SetDivider(PasswordFrame.Width() * 0.25f);
+	m_pPassword->TextView()->HideTyping(true);
 	pView->AddChild(m_pPassword);
 
 

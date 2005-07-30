@@ -11,7 +11,6 @@
 
 #include "../Config.h"
 #include "../Svn/SvnCommands.h"
-#include "../3rd/PassControl.h"
 
 class CheckoutWindow : public BWindow
 {
@@ -39,7 +38,8 @@ private:
 	BFilePanel*   m_pFilePanel;
 	Checkout* 	  m_pCmd;
 	BTextControl* m_pLogin;
-	PassControl*  m_pPassword;	
+	BTextControl* m_pPassword;
+	BTextControl* m_pRevision;
 };
 
 

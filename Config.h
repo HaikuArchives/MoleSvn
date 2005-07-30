@@ -32,9 +32,9 @@
 const float g_fButtonWidth = 80.0f;			// Width of buttons
 const float g_fButtonHeight = 25.0f;		// Height of buttons
 const float g_fStringViewHeight = 15.0f;	// Height of string views
-const float g_fControlSpace = 20.0f;        // Space between controls
+const float g_fControlSpace = 15.0f;        // Space between controls
 const float g_fButtonsSpace = 20.0f;		// Space between buttons
-const float g_fSpaceToWindowBorder = 20.0f;	// Space between control and window border 
+const float g_fSpaceToWindowBorder = 15.0f;	// Space between control and window border 
 
 // Action colors
 const rgb_color g_colDefaultAction = {0, 0, 0, 255};

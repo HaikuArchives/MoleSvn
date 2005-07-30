@@ -56,6 +56,9 @@ v0.2:
 - General
 	- ameliorer la navigation a la souris. pouvoir tout faire rapidement au clavier, sans avoir a touche la souris (commit notamment).
 
+- Fenetre ResulsWindow
+	- prendre en compte la fonction de redimensionnement en fonction du contenu dans la CLV
+
 v0.3:
 *** Code ***
 - Ajouter un systeme de preferences

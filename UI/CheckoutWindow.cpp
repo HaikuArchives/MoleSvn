@@ -17,6 +17,8 @@ using namespace std;
 #define CHECKOUT_CANCEL         	'CCAN'
 #define CHECKOUT_OPEN_DIRECTORY 	'CODI'
 #define CHECKOUT_DIRECTORY_SELECTED 'CDSE'
+#define CHECKOUT_HEAD_SELECTED      'CHEA'
+#define CHECKOUT_REVISION_SELECTED  'CREV'
 
 ///////////////////////////////////////////////////////////////////////////////
 // -- CheckoutWindow
@@ -32,7 +34,7 @@ m_pFilePanel(NULL), m_pCmd(pCmd)
 	BScreen screen;
 	BRect screenFrame = screen.Frame();
 	const float fWindowWidth = 500.0f;
-	const float fWindowHeight = 220.0f;
+	const float fWindowHeight = 290.0f;
 	MoveTo((screenFrame.Width() - fWindowWidth) / 2.0f, (screenFrame.Height() - fWindowHeight) / 2.0f);
 	ResizeTo(fWindowWidth, fWindowHeight);
 
@@ -59,6 +61,16 @@ void CheckoutWindow::MessageReceived(BMessage *message)
 {
 	switch(message->what)
 	{
+		case CHECKOUT_HEAD_SELECTED:
+		{
+			m_pRevision->SetEnabled(false);
+			break;
+		}
+		case CHECKOUT_REVISION_SELECTED:
+		{
+			m_pRevision->SetEnabled(true);
+			break;
+		}
 		case CHECKOUT_OPEN_DIRECTORY:
 		{
 			TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Open checkout directory file panel"));
@@ -100,16 +112,11 @@ void CheckoutWindow::MessageReceived(BMessage *message)
 			TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Check checkout parameters"));
 			if(CheckParameters())
 			{
+				// Hide the current window
 				Hide();
 				
 				TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Checkout parameters OK !"));
-/*				
-				BMessenger messenger(m_pTarget);
-				BMessage* msg = new BMessage(MSG_OK);
-				msg->AddString("url", m_pUrlRepository->Text());
-				msg->AddString("dir", m_pCheckoutDirectory->Text());
-				messenger.SendMessage(msg);
-*/
+
 				ResultsWindow* pWindow = new ResultsWindow(m_pCmd->GetName());
 				m_pCmd->SetTarget(pWindow);
 				
@@ -119,7 +126,7 @@ void CheckoutWindow::MessageReceived(BMessage *message)
 				
 				// Check if we have entered a username/password
 				string strUsername(m_pLogin->Text());
-				string strPassword(m_pPassword->actualText());
+				string strPassword(m_pPassword->Text());
 				if(strUsername.size())
 				{
 					strCmd += string("--username \"") + strUsername + string("\" ");
@@ -128,6 +135,12 @@ void CheckoutWindow::MessageReceived(BMessage *message)
 					{
 						strCmd += string("--password \"") + strPassword + string("\" ");
 					}	
+				}
+				
+				// Check if we have selected a revision number, otherwise it takes the head revision
+				if(m_pRevision->IsEnabled())
+				{
+					strCmd += string("--revision ") + string(m_pRevision->Text()) + string(" ");
 				}
 				
 				// Add the URL repository and the path
@@ -167,30 +180,46 @@ void CheckoutWindow::CreateView()
 	BRect RepositoryBBoxFrame(g_fSpaceToWindowBorder,
 		                      g_fSpaceToWindowBorder,
 	       		              ViewFrame.Width() - (g_fSpaceToWindowBorder),
-	              		      ViewFrame.Height() - (g_fSpaceToWindowBorder) );
+	              		      130 );
 	BBox* pRepositoryBBox = new BBox(RepositoryBBoxFrame,
 									 "RepositoryBBox");
 	pRepositoryBBox->SetLabel("Repository");
 	pView->AddChild(pRepositoryBBox);
 	
+	// Url repository BStringView
+	BRect pUrlRepStringViewFrame(g_fControlSpace, g_fControlSpace, 
+	                   			 fRepositoryBBoxWidth - g_fControlSpace, g_fControlSpace + g_fStringViewHeight);
+	BStringView* pUrlRepStringView = new BStringView(pUrlRepStringViewFrame,
+												    "UrlRepositoryStringView",
+												    "URL of repository : ");
+	pRepositoryBBox->AddChild(pUrlRepStringView);
+	
 	// Url repository textcontrol
-	BRect UrlRepoFrame(g_fControlSpace, g_fControlSpace, 
-	                   fRepositoryBBoxWidth - g_fControlSpace, 0);		// We don't care about the height => 0
+	BRect UrlRepoFrame(g_fControlSpace, pUrlRepStringViewFrame.bottom + 5, 
+	                   fRepositoryBBoxWidth - g_fControlSpace, 0);
 	m_pUrlRepository = new BTextControl(UrlRepoFrame,
 									    "UrlRepositoryTextControl",
 									    "URL of repository",
 									    //"http://svn.collab.net/repos/tortoisesvn/trunk",
 									    //"http://tortoisesvn.tigris.org/svn/tortoisesvn/trunk",
-									    NULL,
+									    "svn://localhost/base1",
+									    //NULL,
 									    NULL);
-	m_pUrlRepository->SetDivider(UrlRepoFrame.Width() * 0.30f);
+	m_pUrlRepository->SetDivider(0.0f);
 	pRepositoryBBox->AddChild(m_pUrlRepository);
 
+	// Checkout directroy BStringView
+	BRect CheckoutDirStringViewFrame(g_fControlSpace, UrlRepoFrame.top + g_fControlSpace + 10, 
+	                       			 fRepositoryBBoxWidth - g_fControlSpace, UrlRepoFrame.top + g_fControlSpace + 10 + g_fStringViewHeight);
+	BStringView* pCheckoutDirStringView = new BStringView(CheckoutDirStringViewFrame,
+													      "CheckoutDirStringView",
+												    	  "Checkout directory : ");
+	pRepositoryBBox->AddChild(pCheckoutDirStringView);
+	
 	// Checkout directory textcontrol
 	const float fSpace = 5.0f;
-	const float fButtonWidth = 20.0f;
-	BRect CheckoutDirFrame(g_fControlSpace, 
-	                       g_fControlSpace + m_pUrlRepository->Frame().Height() + g_fControlSpace, 
+	const float fButtonWidth = 50.0f;
+	BRect CheckoutDirFrame(g_fControlSpace, CheckoutDirStringViewFrame.bottom + 5, 
 	                       fRepositoryBBoxWidth - g_fControlSpace - (fSpace + fButtonWidth), 
 	                       0);
 	BPath path(MoleSvnAddon::GetInstance()->GetCurrentDirectory()); 
@@ -199,9 +228,9 @@ void CheckoutWindow::CreateView()
 											"Checkout directory",
 											path.Path(),
 											NULL);
-	m_pCheckoutDirectory->SetDivider(CheckoutDirFrame.Width() * 0.32f);
+	m_pCheckoutDirectory->SetDivider(0.0f);
 	pRepositoryBBox->AddChild(m_pCheckoutDirectory);
-	
+
 	// Search directory button
 	BRect DirectoryButtonFrame(CheckoutDirFrame.RightTop().x + fSpace,
 	                           CheckoutDirFrame.RightTop().y - 3.0f,
@@ -209,20 +238,23 @@ void CheckoutWindow::CreateView()
 	                           m_pCheckoutDirectory->Frame().Height());
 	BButton* pDirectory = new BButton(DirectoryButtonFrame,
 									  "DirectoryButton",
-									  "...",
+									  "Browse...",
 									  new BMessage(CHECKOUT_OPEN_DIRECTORY));
 	pRepositoryBBox->AddChild(pDirectory);
-	
-	// Resize repo bbox
-	pRepositoryBBox->ResizeTo(RepositoryBBoxFrame.Width(),
-	                          m_pUrlRepository->Frame().Height() + m_pCheckoutDirectory->Frame().Height() + 3.0f * g_fControlSpace);
 
+	// Authentication bbox
+	float fAuthenticationBBoxWidth = (ViewFrame.Width() - (2.0f * g_fSpaceToWindowBorder + g_fControlSpace)) * 0.60f;
+	BRect AuthenticationBBoxFrame(RepositoryBBoxFrame.left,
+   		                          RepositoryBBoxFrame.bottom + g_fControlSpace,
+	       		              	  fAuthenticationBBoxWidth,
+	              		          RepositoryBBoxFrame.bottom + g_fControlSpace + 85 );
+	BBox* pAuthenticationBBox = new BBox(AuthenticationBBoxFrame, "AuthenticationBBox");
+	pAuthenticationBBox->SetLabel("Authentication");
+	pView->AddChild(pAuthenticationBBox);
 
 	// Login
-	BRect LoginFrame(pRepositoryBBox->Frame().left, 
-	                 pRepositoryBBox->Frame().bottom + g_fControlSpace, 
-	                 (pRepositoryBBox->Frame().right - g_fControlSpace) / 2.0f, 
-	                 pRepositoryBBox->Frame().bottom + g_fControlSpace + 20);
+	BRect LoginFrame(g_fControlSpace, g_fControlSpace, 
+	                 (AuthenticationBBoxFrame.Width() - g_fControlSpace), 0);
 	m_pLogin = new BTextControl(LoginFrame,
 								"LoginTextControl",
 								"Login :",
@@ -231,24 +263,66 @@ void CheckoutWindow::CreateView()
 								B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM,
 	                            B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS | B_FULL_UPDATE_ON_RESIZE);
 	m_pLogin->SetDivider(LoginFrame.Width() * 0.25f);
-	pView->AddChild(m_pLogin);
-					
+	pAuthenticationBBox->AddChild(m_pLogin);
 	
 	// Password						
-	BRect PasswordFrame((pRepositoryBBox->Frame().right + g_fControlSpace) / 2.0f,
-  	                    LoginFrame.top, 
- 	                    Frame().Width() - g_fSpaceToWindowBorder,
-	                    LoginFrame.bottom);
-	m_pPassword = new PassControl(PasswordFrame,
+	BRect PasswordFrame(LoginFrame.left, m_pLogin->Frame().bottom + g_fControlSpace, 
+ 	                    LoginFrame.right, 0);
+	m_pPassword = new BTextControl(PasswordFrame,
 								  "PasswordTextView",
 								  "Password :",
 								  "",
 							  	  NULL,
 								  B_FOLLOW_RIGHT | B_FOLLOW_BOTTOM,
 	                              B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS | B_FULL_UPDATE_ON_RESIZE);
-							  	  
+
 	m_pPassword->SetDivider(PasswordFrame.Width() * 0.25f);
-	pView->AddChild(m_pPassword);
+	m_pPassword->TextView()->HideTyping(true);
+	pAuthenticationBBox->AddChild(m_pPassword);
+
+	// Revision bbox
+	BRect RevisionBBoxFrame(AuthenticationBBoxFrame.right + g_fControlSpace,
+   		                          AuthenticationBBoxFrame.top,
+	       		              	  ViewFrame.Width() - g_fSpaceToWindowBorder,
+	              		          AuthenticationBBoxFrame.bottom );
+	BBox* pRevisionBBox = new BBox(RevisionBBoxFrame, "RevisionBBox");
+	pRevisionBBox->SetLabel("Revision");
+	pView->AddChild(pRevisionBBox);
+	
+	// Head radio button
+	BRect HeadFrame(g_fControlSpace, g_fControlSpace,
+	                RevisionBBoxFrame.Width() - g_fControlSpace, g_fStringViewHeight);
+	BRadioButton* pHeadButton = new BRadioButton(HeadFrame, 
+	         									 "HeadRadioButton",
+	         									 "Head",
+	         									 new BMessage(CHECKOUT_HEAD_SELECTED));
+	pHeadButton->SetValue(1);
+	pRevisionBBox->AddChild(pHeadButton);
+
+	// Revision radio button
+	BRect NumberRevisionFrame(g_fControlSpace, PasswordFrame.top,
+	                          RevisionBBoxFrame.Width() * 0.4f, g_fStringViewHeight);
+	BRadioButton* pNumberRevisionButton = new BRadioButton(NumberRevisionFrame, 
+	         									 "NumberRevisionButton",
+	         									 "Revision : ",
+	         									 new BMessage(CHECKOUT_REVISION_SELECTED));
+	pRevisionBBox->AddChild(pNumberRevisionButton);
+
+	// Revision textcontrol
+	BRect RevisionFrame(NumberRevisionFrame.right + g_fControlSpace, NumberRevisionFrame.top, 
+	                    RevisionBBoxFrame.Width() - g_fControlSpace, 0);
+	m_pRevision = new BTextControl(RevisionFrame,
+								"RevisionTextControl",
+								"Revision :",
+								"",
+								NULL,
+								B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM,
+	                            B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS | B_FULL_UPDATE_ON_RESIZE);
+	m_pRevision->SetDivider(0.0f);
+	m_pRevision->SetEnabled(false);			// Disable by default
+	pRevisionBBox->AddChild(m_pRevision);
+	
+
 
 	// Ok button
 	float fButtonX = Frame().IntegerWidth() - (g_fButtonWidth + g_fSpaceToWindowBorder);
@@ -293,6 +367,20 @@ bool CheckoutWindow::CheckParameters()
 	{
 		ShowErrorWindow("checkout directory is empty");
 		bRes = false;
+	}
+	
+	// Check if the user has selected a revision
+	if(m_pRevision->IsEnabled())
+	{
+		// Retrieve the revision number
+		unsigned long int nRevision = strtol(m_pRevision->Text(), (char **)NULL, 10);
+		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Revision number : %d", nRevision));		
+		if(nRevision == 0)
+		{
+			ShowErrorWindow("invalid revision number");
+			bRes = false;
+		}
+		
 	}
 	
 	return bRes;

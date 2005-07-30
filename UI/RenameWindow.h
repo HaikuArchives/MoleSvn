@@ -11,7 +11,7 @@
 
 #include "../Config.h"
 #include "../Svn/SvnCommands.h"
-#include "../3rd/PassControl.h"
+
 
 class RenameWindow : public BWindow
 {
