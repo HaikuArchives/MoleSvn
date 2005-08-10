@@ -10,7 +10,7 @@
 #include <string.h> 
 #include <fstream.h> 
 #include <unistd.h>
-//#include <io.h> 
+#include <net/socket.h>
 
 using namespace std;
 
@@ -119,19 +119,20 @@ int SvnCommand::ExecuteSvn(const string& strCommand)
 		dup2(m_StderrPipes[1], HF_STDERR);
 
 		// Execute command
-		//TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Execute = %s", strCommand.c_str()));
+		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Execute = %s", strCommand.c_str()));
 		//int err = execl(strCommand.c_str(), NULL);
+		//int err = execvp(strCommand.c_str(), NULL);
 		int err = system(m_strCommand.c_str());
-/*		
+/*
 		int err = 0;
-		printf("1\n");
-		printf("2\n");
-		printf("3\n");
-		printf("4\n");
-		printf("5\n");
-		printf("6\n");
-		printf("7\n");
-*/	
+		printf("1\r\n");
+		printf("2\r\n");
+		printf("3\r\n");
+		printf("4\r\n");
+		printf("5\r\n");
+		printf("6\r\n");
+		printf("7\r\n");
+*/
 		// close our writing pipe, because we must have only one pipe open
 		// and STDOUT is already open
 		close(m_StdoutPipes[1]);
@@ -173,55 +174,34 @@ int SvnCommand::RetrieveSvnOutput()
 	// Read the pipe 0
 	const int Buffer_Max = 512;
     char Line[Buffer_Max]; 
-#define MOLESVN_USE_IFSTREAM
+//#define MOLESVN_USE_IFSTREAM
 #if defined(MOLESVN_USE_IFSTREAM)    
     ifstream R(m_StdoutPipes[0]); 
 #else
-
+	FILE* fstdout = fdopen(m_StdoutPipes[0], "r");
 #endif //MOLESVN_USE_IFSTREAM
     
     bool bHasMessage = false;
-    
     string strTmp;
+    
 	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Reading pipe..."));
+#if defined(MOLESVN_USE_IFSTREAM)
 	do
     { 
-#if defined(MOLESVN_USE_IFSTREAM)
-/*
-		string strLine;
-		strTmp = string();
-		streamsize ssize;
-		do
-		{
-			R.getline(Line, Buffer_Max);
-			strLine = string(Line);
-			ssize = R.gcount();
-			TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, " string.size() = %d", strLine.size()));			
-			TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, " ssize = %d", ssize));			
-			strTmp += strLine;	
-		}
-		while(strLine.size() == Buffer_Max);
-*/
 		R.getline(Line, Buffer_Max);
 		strTmp = string(Line);	
 
 #else
-		fd_set rds;
-		FD_ZERO(&rds);
-		FD_SET(fileno(m_StdoutPipes),&rds);
-		int ret=select(fileno(m_StdoutPipes)+1,&rds,0,0,0);
-//		if(ret<0)
-//	       throw AhuException("Error waiting on data from coprocess: "+stringerror());
-//		if(!ret)
-//			throw AhuException("Timeout waiting for data from coprocess");
- 
-		fgets(Line,sizeof(Line),m_StdoutPipes[0]);
-//			throw AhuException("Child closed pipe");
-
+	while (!feof(fstdout))
+	{
+		fgets(Line, Buffer_Max, fstdout);
 		char *p;
 		if((p=strrchr(Line,'\n')))
-		*p=0;
+			*p=0;
 		strTmp = string(Line);
+		
+		//fgetc(fstdout);
+		
 #endif //MOLESVN_USE_IFSTREAM		
 		
 		// check if the line is not empty
@@ -238,12 +218,21 @@ int SvnCommand::RetrieveSvnOutput()
 			
 			bHasMessage = true;
     	}
+    	
+#if defined(MOLESVN_USE_IFSTREAM)
     } while (!R.eof());
+#else
+	}
+#endif    
 
 	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "End of reading pipe..."));
 
+#if defined(MOLESVN_USE_IFSTREAM)
 	// Close stream    
     R.close();
+#else
+    fclose(fstdout);
+#endif    
 
 	// Close pipe
     close(m_StdoutPipes[0]);
@@ -258,8 +247,12 @@ int SvnCommand::RetrieveSvnOutput()
 	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "SVN error : %d", nSvnError));
 	if(nSvnError)
 	{
+#if defined(MOLESVN_USE_IFSTREAM)
 		// Read stderr
     	ifstream ErrStream(m_StderrPipes[0]); 
+#else
+		FILE* fstderr = fdopen(m_StderrPipes[0], "r");
+#endif
     
     	string strErr;
     	char tmp[128];
@@ -267,15 +260,25 @@ int SvnCommand::RetrieveSvnOutput()
     	strErr += string(tmp);
     	
 		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Reading stderr pipe..."));
+
+#if defined(MOLESVN_USE_IFSTREAM)
 		do
 	    { 
 			ErrStream.getline(Line,sizeof(Line)); 
-		
 			strErr += string(Line);
     	} while (!ErrStream.eof());
 
 		// Close stream    
     	ErrStream.close();
+#else
+		while(!feof(fstderr))
+		{
+			fgets(Line,sizeof(Line), fstderr); 
+			strErr += string(Line);
+		}
+		
+		fclose(fstderr);
+#endif    
  
 		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "End of reading stderr pipe..."));
 		
@@ -301,6 +304,7 @@ int SvnCommand::RetrieveSvnOutput()
     
 	// Create a message
 	BMessage msg(MSG_CMD_FINISHED);
+	
 	// Send message
 	m_pTarget->PostMessage(&msg);
 	

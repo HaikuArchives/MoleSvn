@@ -15,6 +15,11 @@ pb resolu avec un menu dynamique:
 	- cleanup en selectionnant des fichiers => seulement sur des repertoires
 
 
+Compil avec boost+stlport.
+- aucune modif apportee la config de boost
+- compil de stlport en static sans les streams
+- mettre libstlport_gcc.a et libstdc++.r4.so en bas du projet BeIDE sinon ca link pas !!
+
 
 
 Release

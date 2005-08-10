@@ -10,8 +10,11 @@
 #include "../MoleSvnAddon.h"
 #include "MessageCommands.h"
 #include "ResultsWindow.h"
+#define BOOST_NO_STRINGSTREAM
+#include <boost/lexical_cast.hpp>
 
 using namespace std;
+using namespace boost;
 
 #define CHECKOUT_OK             	'C_OK'
 #define CHECKOUT_CANCEL         	'CCAN'
@@ -373,14 +376,22 @@ bool CheckoutWindow::CheckParameters()
 	if(m_pRevision->IsEnabled())
 	{
 		// Retrieve the revision number
-		unsigned long int nRevision = strtol(m_pRevision->Text(), (char **)NULL, 10);
-		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Revision number : %d", nRevision));		
-		if(nRevision == 0)
+		try
+		{
+			int nRevision = lexical_cast<int>(m_pRevision->Text());
+			TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Revision number : %d", nRevision));
+			
+			if(nRevision <= 0)
+			{
+				ShowErrorWindow("invalid revision number");
+				bRes = false;
+			}
+		}
+		catch(...)
 		{
 			ShowErrorWindow("invalid revision number");
 			bRes = false;
 		}
-		
 	}
 	
 	return bRes;

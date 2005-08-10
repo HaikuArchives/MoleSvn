@@ -22,7 +22,7 @@ void process_refs(entry_ref dir_ref, BMessage *msg, void *)
 	
 	try
 	{
-		// check if the user has seleted files...
+		// check if the user has selected files...
 		int nRefs; 
 		entry_ref file_ref; 
 		list<entry_ref> lstEntry;	

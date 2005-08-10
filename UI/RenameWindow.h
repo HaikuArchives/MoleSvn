@@ -34,7 +34,7 @@ private:
 		// Description : returns true if the Rename parameters entered by the
 		//               user are valid.
 		
-	string m_strOldName;
+	std::string m_strOldName;
 		// Description : name to rename
 
 	BTextControl* m_pRename;

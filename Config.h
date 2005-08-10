@@ -21,11 +21,12 @@
 #include "Utils/Exception.h"
 #include "Utils/Utils.h"
 
+
 //#include "3rd/mmgr/mmgr.h"	// Enable mmgr
 
 // Current MoleSVN version
 #define MOLESVN_MAJOR_VERSION 0
-#define MOLESVN_MINOR_VERSION 2
+#define MOLESVN_MINOR_VERSION 3
 
 
 // UI constants
