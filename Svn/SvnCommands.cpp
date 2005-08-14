@@ -174,7 +174,7 @@ int SvnCommand::RetrieveSvnOutput()
 	// Read the pipe 0
 	const int Buffer_Max = 512;
     char Line[Buffer_Max]; 
-//#define MOLESVN_USE_IFSTREAM
+#define MOLESVN_USE_IFSTREAM
 #if defined(MOLESVN_USE_IFSTREAM)    
     ifstream R(m_StdoutPipes[0]); 
 #else
@@ -199,8 +199,6 @@ int SvnCommand::RetrieveSvnOutput()
 		if((p=strrchr(Line,'\n')))
 			*p=0;
 		strTmp = string(Line);
-		
-		//fgetc(fstdout);
 		
 #endif //MOLESVN_USE_IFSTREAM		
 		

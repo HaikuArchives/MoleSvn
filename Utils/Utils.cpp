@@ -14,7 +14,7 @@ using namespace std;
 void ShowAboutWindow() 
 {
 	char version[1024];
-	sprintf(version, "MoleSVN -- Subversion Tracker add-on\n\nVersion %d.%d (%s)\n\nHomepage : http://molesvn.sourceforge.net\n\nCreated by :\n  - Kor (bresson.cedric@voila.fr)\n  - Chowette (lhumbertclaude@yahoo.fr)\n\nThanks to :\nRudolf, Ubix.org, Beosfrance.com\n\n Note : This is an alpha version, feedback is very important.If you find bugs, please report them in our bugs tracker (see homepage). Thank you very much.", MOLESVN_MAJOR_VERSION, MOLESVN_MINOR_VERSION, __DATE__);
+	sprintf(version, "MoleSVN -- Subversion Tracker add-on\n\nVersion %d.%d (%s)\n\nHomepage : http://molesvn.sourceforge.net\n\nCreated by :\n  - Kor (bresson.cedric@voila.fr)\n  - Chowette (lhumbertclaude@yahoo.fr)\n\nThanks to :\nRudolf, Ubix.org, Beosfrance.com, P.Houdoin\n\n Note : This is an alpha version, feedback is very important.If you find bugs, please report them in our bugs tracker (see homepage). Thank you very much.", MOLESVN_MAJOR_VERSION, MOLESVN_MINOR_VERSION, __DATE__);
 	(new BAlert(0, 
 				version,
 				"Okay",

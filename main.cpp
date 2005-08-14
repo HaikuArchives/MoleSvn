@@ -26,9 +26,16 @@ void process_refs(entry_ref dir_ref, BMessage *msg, void *)
 		int nRefs; 
 		entry_ref file_ref; 
 		list<entry_ref> lstEntry;	
+		char name[B_FILE_NAME_LENGTH]; 
 		for (nRefs=0; msg->FindRef("refs", nRefs, &file_ref) == B_NO_ERROR; nRefs++) 
 		{
-			lstEntry.push_back(file_ref);
+			// Check if the entry is a .svn directory
+			BEntry svnentry(&file_ref);
+			svnentry.GetName(name); 	
+			if(string(".svn") != name)
+			{
+				lstEntry.push_back(file_ref);
+			}
 		}
 
 		// Set parameters to the instance of the addon

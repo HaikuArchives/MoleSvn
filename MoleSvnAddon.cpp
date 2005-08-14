@@ -102,8 +102,23 @@ void MoleSvnAddon::SetParameters(const entry_ref& rCurrentDirectory,
 	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Current directory = %s", path.Path()));
 	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Nb entries = %i", m_lstEntry.size()));
 	
-	// Load repository of the current directory
+	// Load repository of the current directory (if it exists)
 	LoadRepository(BDirectory(&m_CurrentDirectory));
+	
+	// And for each directory selected by the user
+	list<entry_ref>::const_iterator ite = m_lstEntry.begin();
+	while(ite != m_lstEntry.end())
+	{
+		// Is it a directory ?
+		BDirectory dir(&(*ite));
+		if(dir.InitCheck() == B_OK)
+		{
+			// Ok, so we load the repository
+			LoadRepository(dir);
+		}
+		
+		++ite;
+	}
 }
 
 bool MoleSvnAddon::HasRepository(const BDirectory& dir)
@@ -122,8 +137,9 @@ bool MoleSvnAddon::HasRepository(const BDirectory& dir)
 		str.assign(p##str); \
 
 
-bool MoleSvnAddon::LoadRepository(const BDirectory& dir)
+bool MoleSvnAddon::LoadRepository(const BDirectory& dir, BLooper* pLooper)
 {
+	// Here, the dir cannot be a .svn directory => filter on the selected files
 	// Check if the dir contains .svn subdirectory
 	if(!HasRepository(dir))
 		return false;
@@ -158,11 +174,14 @@ bool MoleSvnAddon::LoadRepository(const BDirectory& dir)
 
 			TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Element = %s  name=%s ", pElt->Value(), strName.c_str()));
 			
+			SvnEntry* pEntry = NULL;
+			entry_ref ertmp;
+			BMessage msg;
+			
 			if(strKind == string("file"))
 			{
 				// Retrieve entry_ref from the name
 				BEntry entrytmp(&dir, strName.c_str());
-				entry_ref ertmp;
 				entrytmp.GetRef(&ertmp);
 				
 				// Retrieve infos about the file
@@ -171,7 +190,7 @@ bool MoleSvnAddon::LoadRepository(const BDirectory& dir)
 				
 				if(strName.size() == 0)
 				{
-					// it's not a file, it's infos about a path
+					// it's not a file, it's infos about the path
 					//string strUrl(pElt->Attribute("url"));
 					//string strUuid(pElt->Attribute("uuid"));
 					//string strRevision(pElt->Attribute("revision"));
@@ -190,12 +209,13 @@ bool MoleSvnAddon::LoadRepository(const BDirectory& dir)
 					RETRIEVE_INFO(strPropTime, pElt->Attribute("prop-time"));										
 					RETRIEVE_INFO(strLastAuthor, pElt->Attribute("last-author"));
 					RETRIEVE_INFO(strSchedule, pElt->Attribute("schedule"));
-
+					
 					SvnFileEntry* pFileEntry = new SvnFileEntry(strName);
 					//pFileEntry->SetCommittedRevision(strCommittedRev);
 					pFileEntry->SetLastAuthor(strLastAuthor);
 					pFileEntry->SetSchedule(strSchedule);
-					m_mapSvnEntries[ertmp] = pFileEntry;
+					pEntry = pFileEntry;
+					msg.what = 'FILE';
 				}
 			}
 			else // dir
@@ -204,10 +224,22 @@ bool MoleSvnAddon::LoadRepository(const BDirectory& dir)
 				BDirectory dirtmp(&dir, strName.c_str());				
 				BEntry entrytmp;
 				dirtmp.GetEntry(&entrytmp);
-				entry_ref ertmp;
 				entrytmp.GetRef(&ertmp);
+				msg.what = 'DIRE';
 				
-				m_mapSvnEntries[ertmp] = new SvnDirEntry(strName);
+				pEntry = new SvnDirEntry(strName);
+			}
+			
+			// Add element
+			if(pEntry)
+			{
+				m_mapSvnEntries[ertmp] = pEntry;
+				
+				if(pLooper)
+				{
+					pLooper->PostMessage(&msg);
+				}
+				
 			}
 			
 			// Next element
@@ -305,6 +337,10 @@ entry_ref* MoleSvnAddon::GetCurrentDirectory()
 	return &m_CurrentDirectory;
 }
 
+const list<entry_ref>& MoleSvnAddon::GetSelectedEntryList() const
+{
+	return m_lstEntry;
+}
 
 string MoleSvnAddon::GetEntryNameList() const
 {
@@ -383,18 +419,25 @@ BPopUpMenu* MoleSvnAddon::CreateMenu()
 */
 	bool bCurDirHasRepo = HasRepository(BDirectory(&m_CurrentDirectory));
 	bool bHasSelectedFiles = m_lstEntry.size();
+	unsigned int nSelectedFilesCount = m_lstEntry.size();
 
-	bool bAllInRepository = find_if(m_lstEntry.begin(), m_lstEntry.end(), AllInRepositoryFunc) != m_lstEntry.end();
+	unsigned int nSize = 0;
+	count_if(m_lstEntry.begin(), m_lstEntry.end(), AllInRepositoryFunc, nSize);
+	bool bAllInRepository = (nSize == 0) ? false : (nSize == nSelectedFilesCount);
+	
 
 	// Create the menu
 	BPopUpMenu* pMenu = new BPopUpMenu("menu");
-	if(!bCurDirHasRepo)
+	if(!bCurDirHasRepo && (nSelectedFilesCount <= 1) && !bAllInRepository )
 	{
 		pMenu->AddItem(new IconMenuItem(new Checkout()));
+		//pMenu->AddItem(new IconMenuItem(new Export()));
+		//pMenu->AddItem(new IconMenuItem(new Import()));
+		//pMenu->AddItem(new IconMenuItem(new CreateRepositoryHere()));
 		pMenu->AddSeparatorItem();
 	}
 	
-	if(bCurDirHasRepo || bHasSelectedFiles )
+	if( bCurDirHasRepo || bAllInRepository )
 	{
 		pMenu->AddItem(new IconMenuItem(new Update()));
 		pMenu->AddItem(new IconMenuItem(new Commit()));
@@ -402,21 +445,22 @@ BPopUpMenu* MoleSvnAddon::CreateMenu()
 	}
 
 	bool bNeedToAddSeparator = false;
-	if(bCurDirHasRepo && bHasSelectedFiles && !bAllInRepository)
+	if( bCurDirHasRepo && bHasSelectedFiles && !bAllInRepository )
 	{
 		pMenu->AddItem(new IconMenuItem(new Add()));
+		//pMenu->AddItem(new IconMenuItem(new AddToIgnoreList()));
 		bNeedToAddSeparator = true;
 	}
 	
-	if(bCurDirHasRepo && bHasSelectedFiles && bAllInRepository)
+	if( bAllInRepository && bHasSelectedFiles )
 	{
 		pMenu->AddItem(new IconMenuItem(new Delete()));
 		pMenu->AddItem(new IconMenuItem(new Revert()));	
 		bNeedToAddSeparator = true;
 	}
 	
-	// if the user has selected only one file
-	if(bCurDirHasRepo && bAllInRepository && (m_lstEntry.size() == 1) )
+	// if the user has selected only one file in a repository
+	if(bCurDirHasRepo && bAllInRepository && (nSelectedFilesCount == 1) )
 	{
 		pMenu->AddItem(new IconMenuItem(new Rename()));	
 		bNeedToAddSeparator = true;
@@ -427,7 +471,24 @@ BPopUpMenu* MoleSvnAddon::CreateMenu()
 		pMenu->AddSeparatorItem();
 		bNeedToAddSeparator = false;
 	}
+	
+	if( bHasSelectedFiles && bAllInRepository )
+	{
+		pMenu->AddItem(new IconMenuItem(new Cleanup()));
+		if( nSelectedFilesCount == 1 )
+			pMenu->AddItem(new IconMenuItem(new Resolved()));	
+		pMenu->AddSeparatorItem();
+	}
+	
+	if( bCurDirHasRepo || bAllInRepository )
+	{
+		pMenu->AddItem(new IconMenuItem(new Status()));
+		pMenu->AddSeparatorItem();
+	}
+	
 
+	//pMenu->AddItem(new IconMenuItem(new Help())); // ???
+	//pMenu->AddItem(new IconMenuItem(new Settings()));
 	pMenu->AddItem(new IconMenuItem(new About()));
 
 	// returns the popupmenu

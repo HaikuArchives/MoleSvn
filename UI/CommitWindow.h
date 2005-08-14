@@ -11,7 +11,16 @@
 
 #include "../Config.h"
 #include "../Svn/SvnCommands.h"
+/*
+#	if defined(B_ZETA_VERSION)
+#		include <interface/ColumnTypes.h>
+#	else // BEOS
+#		include <experimental/ColumnTypes.h>
+		using namespace BExperimental;
+#	endif // ZETA
+*/
 
+#include "../3rd/BCLV/ColumnTypes.h"
 
 class CommitWindow : public BWindow
 {
@@ -26,14 +35,24 @@ public:
 	// -- Hooks ---------------------------------------------------------------
 	virtual void MessageReceived(BMessage *message);
 
+	// -- Misc ----------------------------------------------------------------
+	int32 LoadEntries();
+		// Description : create a new thread and load svn entries recursively 
+
 private:
 	void CreateView();
 		// Description : build UI
 		
-	Commit* 	  m_pCmd;
-	BTextView* 	  m_pTextView;
-	BTextControl* m_pLogin;
-	BTextControl* m_pPassword;
+	void AddItem(const string& strText);
+		// Description : add a new item to the CLV
+		
+	Commit* 	  		m_pCmd;
+	BColumnListView*  	m_pFilesToCommitView;
+	BTextView* 	  		m_pTextView;
+	BTextControl* 		m_pLogin;
+	BTextControl* 		m_pPassword;
+	
+	TRACE_CLASS (CC_APPLICATION);
 };
 
 

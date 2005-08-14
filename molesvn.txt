@@ -20,7 +20,9 @@ Compil avec boost+stlport.
 - compil de stlport en static sans les streams
 - mettre libstlport_gcc.a et libstdc++.r4.so en bas du projet BeIDE sinon ca link pas !!
 
-
+BUG:
+- affichage foireux avec la commande status sur le repertoire base1, et marche tres bien sur base1copy
+ => probleme lie a la nouveau lecture sans les streams
 
 Release
 v0.1:
@@ -35,11 +37,10 @@ v0.1:
 v0.2:
 *** Nouvelles commandes ***
 - Remove
-- Blame
+- Blame => non
 - Cleanup
-
-- Export
-- Import
+- Export => pas fait
+- Import => pas fait
 
 *** Code ***
 - Arreter l'execution de svn n'importe quand, un bon vieux kilage de thread en pleine gueule tu vas voir !! haha
@@ -48,10 +49,28 @@ v0.2:
 - checker que les logins/password ne sont pas que des espaces !!
 - changer le type de ressources des icones en bitmap (voir si c'est possible avec les menu) pour reduire la taille de l'addon.
 
+v0.3:
+*** Code ***
+- nouvelle commandes : import / export / create repository here
+- lecture nickel d'un fichier entries pour le commit
+
+
+Realise:
+- Better popup menu (the content now really depends of the state of the selected files)
+- More options for some commands (checkout, commit)
+
+
+v0.4
+*** Code ***
+- Ajouter un systeme de preferences
+	- stocker les derniers messages de commit
+	- stocker les positions/dimensions des fenetres lors de la derniere execution
+	- stocker les derniers repository qui ont ete checkoutes
+- Refactoring du mecanisme d'execution des commandes svn, pour prendre en compte une gestion plus souple de l'interface
+
 *** Code 3rd party ****
 - Utiliser le singleton de Loki pour eviter la fuite memoire dans MoleSvnAddon (je sais pas comment le tracker se comporte, vis a vis de l'image de l'add on)
 - Utiliser MMgr pour verifier les fuites memoires
-- Utiliser Boost pour le parse
 
 *** Interface *****
 - Fenetre About :
@@ -59,15 +78,12 @@ v0.2:
 	- Rajouter une image avec un logo de MoleSVN
 
 - General
-	- ameliorer la navigation a la souris. pouvoir tout faire rapidement au clavier, sans avoir a touche la souris (commit notamment).
+	- ameliorer la navigation a la souris. pouvoir tout faire rapidement au clavier, sans avoir a toucher la souris (commit notamment).
 
 - Fenetre ResulsWindow
 	- prendre en compte la fonction de redimensionnement en fonction du contenu dans la CLV
 
-v0.3:
-*** Code ***
-- Ajouter un systeme de preferences
-	- stocker les derniers messages de commit
-	- stocker les positions/dimensions des fenetres lors de la derniere execution
-	- stocker les derniers repository qui ont ete checkoutes
-- Refactoring du mecanisme d'execution des commandes svn, pour prendre en compte une gestion plus souple de l'interface
+
+Idées:
+- gerer un cache pour le contenu des fichiers entries, avec un node monitoring (daemon MoleSVNCache lancé automatiquement)
+	=> quel pourrait etre le lien entre MoleSVNCache et le Tracker ??

@@ -59,7 +59,7 @@ public:
 	bool HasRepository(const BDirectory& dir);
 		// Description : returns True if the directory dir contains a svn repository (.svn directory)
 
-	bool LoadRepository(const BDirectory& dir);
+	bool LoadRepository(const BDirectory& dir, BLooper* pLooper = NULL);
 		// Description : load the repository of the directory dir
 		
 	SvnEntry* IsInRepository(const entry_ref& e);
@@ -82,6 +82,9 @@ public:
 	
 	entry_ref* GetCurrentDirectory();
 		// Description : returns the current working directory
+
+	const std::list<entry_ref>& GetSelectedEntryList() const;
+		// Description : return the entry_ref list that the user has selected
 
 	std::string GetEntryNameList() const;
 		// Description : returns the list name of all selected entries by the user

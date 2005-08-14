@@ -34,7 +34,7 @@ void Delete::Execute()
 	
 	m_pTarget = new ResultsWindow(GetName());
 	
-	ExecuteSvn(string("svn delete ") + MoleSvnAddon::GetInstance()->GetEntryNameList());	
+	ExecuteSvn(string("svn delete --force ") + MoleSvnAddon::GetInstance()->GetEntryNameList());	
 }
 
 
