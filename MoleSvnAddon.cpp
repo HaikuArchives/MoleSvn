@@ -17,9 +17,11 @@
 #include "Svn/SvnFileEntry.h"
 
 #include <string>
+#include <algorithm>
 
 //#define TIXML_USE_STL
 #include "3rd/TinyXML/tinyxml.h"
+
 
 using namespace std;
 
@@ -41,9 +43,10 @@ MoleSvnAddon::MoleSvnAddon()
 		throw FileNotFound(filename);
 	}
 
-	// Create resources manager
+	// Create the resources manager
 	m_pResources = new MoleSvnResources(&file);	
 }
+
 
 MoleSvnAddon::MoleSvnAddon(const MoleSvnAddon& addon)
 {
@@ -67,6 +70,7 @@ MoleSvnAddon::~MoleSvnAddon()
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
 
+	// Delete the resources manager
 	if(m_pResources)
 	{
 		delete m_pResources;
@@ -95,29 +99,81 @@ void MoleSvnAddon::SetParameters(const entry_ref& rCurrentDirectory,
 	m_CurrentDirectory = rCurrentDirectory;
 	m_lstEntry = lstEntry;
 	
-	// Set current working directory, where the user has clicked
+	// Set the current working directory, which is where the user clicked
 	BPath path(&m_CurrentDirectory);
 	chdir(path.Path());
 	
 	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Current directory = %s", path.Path()));
 	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Nb entries = %i", m_lstEntry.size()));
-	
-	// Load repository of the current directory (if it exists)
-	LoadRepository(BDirectory(&m_CurrentDirectory));
-	
-	// And for each directory selected by the user
-	list<entry_ref>::const_iterator ite = m_lstEntry.begin();
-	while(ite != m_lstEntry.end())
+
+	hash_map<entry_ref, SvnEntry*, hashEntryRef, eqEntryRef>& CurDirEntriesMap = m_mapSvnEntries;
+	BDirectory curDir(&m_CurrentDirectory);
+	if(HasRepository(curDir))
 	{
-		// Is it a directory ?
-		BDirectory dir(&(*ite));
-		if(dir.InitCheck() == B_OK)
+		// Load repository of the current directory
+		LoadEntriesFile(curDir, CurDirEntriesMap);
+		
+		if(lstEntry.size())
 		{
-			// Ok, so we load the repository
-			LoadRepository(dir);
+			// We apply a filter with all selected files
+			UpdateEntriesFromList(CurDirEntriesMap, lstEntry);
+		}
+		else
+		{
+			// No files have been selected, so we apply a filter with the content of the current directory
+			list<entry_ref> lstTmpEntry;
+			list<BDirectory> lstTmpSubDir;
+			GetEntriesList(curDir, lstTmpEntry, lstTmpSubDir);
+			UpdateEntriesFromList(CurDirEntriesMap, lstTmpEntry);
+		}
+	}
+	else
+	{
+		// Here, the current directory doesn't have a repository
+		// We create a list of all directories that have been selected
+		list<BDirectory> lstSelectedSubdir;
+		list<entry_ref>::const_iterator ite = lstEntry.begin();
+		while(ite != lstEntry.end())
+		{
+			BDirectory subdir(&*ite);
+			if(subdir.InitCheck() == B_OK)
+			{
+				lstSelectedSubdir.push_back(subdir);
+			}
+			++ite;
 		}
 		
-		++ite;
+		// For each selected directory, we look if it has repository
+		char tmp[B_FILE_NAME_LENGTH];
+		list<BDirectory>::const_iterator ite2 = lstSelectedSubdir.begin();
+		while(ite2 != lstSelectedSubdir.end())
+		{
+			// Retrieve entry_ref from the name
+			const BDirectory& dirtmp = *ite2;
+			BEntry entrytmp;
+			entry_ref ertmp;
+			dirtmp.GetEntry(&entrytmp);
+			entrytmp.GetRef(&ertmp);
+			entrytmp.GetName(tmp);
+			
+			BPath dirPath(&entrytmp);
+			//SvnDirEntry* pEntry = new SvnDirEntry(string(tmp));
+			SvnDirEntry* pEntry = new SvnDirEntry(dirPath);
+			if(HasRepository(*ite2))
+			{
+				pEntry->SetStatus(SvnEntry::Unmodified);
+			}
+			else
+			{
+				pEntry->SetStatus(SvnEntry::NonVersioned);
+			}
+
+			TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Dir entry added = %s (%s)", tmp, pEntry->GetStatusString().c_str()));
+		
+			CurDirEntriesMap[ertmp] = pEntry;
+			
+			++ite2;
+		}
 	}
 }
 
@@ -128,126 +184,6 @@ bool MoleSvnAddon::HasRepository(const BDirectory& dir)
 	// Retrieve the subdirectory "svn"
 	BEntry SvnEntry;
 	return (dir.FindEntry(".svn", &SvnEntry) == B_OK);
-}
-
-#define RETRIEVE_INFO(str, attribut) \
-	string str; \
-	const char* p##str = attribut; \
-	if(p##str) \
-		str.assign(p##str); \
-
-
-bool MoleSvnAddon::LoadRepository(const BDirectory& dir, BLooper* pLooper)
-{
-	// Here, the dir cannot be a .svn directory => filter on the selected files
-	// Check if the dir contains .svn subdirectory
-	if(!HasRepository(dir))
-		return false;
-	
-	BEntry entry(GetEntriesEntry(dir));
-
-	BPath path;
-	entry.GetPath(&path);
-	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Loading file = %s", path.Path()));
-	TiXmlDocument doc( path.Path() );
-	doc.LoadFile();	
-	if ( doc.Error() && doc.ErrorId() == TiXmlBase::TIXML_ERROR_OPENING_FILE ) 
-	{
-		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "File not found = %s", path.Path()));
-		return false;
-	}
-	else
-	{
-		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Reading file ok = %s", path.Path()));
-
-		// Now, we can extract infos
-		TiXmlElement* pRoot = doc.RootElement();
-		if(!pRoot)
-			return false;
-			
-		TiXmlElement* pElt = pRoot->FirstChildElement();
-		while(pElt)
-		{
-			// Retrieve common infos
-			RETRIEVE_INFO(strName, pElt->Attribute("name"));
-			RETRIEVE_INFO(strKind, pElt->Attribute("kind"));
-
-			TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Element = %s  name=%s ", pElt->Value(), strName.c_str()));
-			
-			SvnEntry* pEntry = NULL;
-			entry_ref ertmp;
-			BMessage msg;
-			
-			if(strKind == string("file"))
-			{
-				// Retrieve entry_ref from the name
-				BEntry entrytmp(&dir, strName.c_str());
-				entrytmp.GetRef(&ertmp);
-				
-				// Retrieve infos about the file
-				RETRIEVE_INFO(strCommittedRev, pElt->Attribute("committed-rev"));
-				RETRIEVE_INFO(strCommittedDate, pElt->Attribute("committed-date"));
-				
-				if(strName.size() == 0)
-				{
-					// it's not a file, it's infos about the path
-					//string strUrl(pElt->Attribute("url"));
-					//string strUuid(pElt->Attribute("uuid"));
-					//string strRevision(pElt->Attribute("revision"));
-					//string strLastAuthor(pElt->Attribute("last-author"));
-					RETRIEVE_INFO(strUrl, pElt->Attribute("url"));
-					RETRIEVE_INFO(strUuid, pElt->Attribute("uuid"));
-					RETRIEVE_INFO(strRevision, pElt->Attribute("revision"));
-					RETRIEVE_INFO(strLastAuthor, pElt->Attribute("last-author"));
-				}
-				else
-				{
-					//string strTextTime(pElt->Attribute("text-time"));
-					//string strChecksum(pElt->Attribute("checksum"));
-					RETRIEVE_INFO(strTextTime, pElt->Attribute("text-time"));
-					RETRIEVE_INFO(strChecksum, pElt->Attribute("checksum"));										
-					RETRIEVE_INFO(strPropTime, pElt->Attribute("prop-time"));										
-					RETRIEVE_INFO(strLastAuthor, pElt->Attribute("last-author"));
-					RETRIEVE_INFO(strSchedule, pElt->Attribute("schedule"));
-					
-					SvnFileEntry* pFileEntry = new SvnFileEntry(strName);
-					//pFileEntry->SetCommittedRevision(strCommittedRev);
-					pFileEntry->SetLastAuthor(strLastAuthor);
-					pFileEntry->SetSchedule(strSchedule);
-					pEntry = pFileEntry;
-					msg.what = 'FILE';
-				}
-			}
-			else // dir
-			{
-				// Retrieve entry_ref from the name
-				BDirectory dirtmp(&dir, strName.c_str());				
-				BEntry entrytmp;
-				dirtmp.GetEntry(&entrytmp);
-				entrytmp.GetRef(&ertmp);
-				msg.what = 'DIRE';
-				
-				pEntry = new SvnDirEntry(strName);
-			}
-			
-			// Add element
-			if(pEntry)
-			{
-				m_mapSvnEntries[ertmp] = pEntry;
-				
-				if(pLooper)
-				{
-					pLooper->PostMessage(&msg);
-				}
-				
-			}
-			
-			// Next element
-			pElt = pElt->NextSiblingElement();
-		}
-	}
-	
-	return true;
 }
 
 SvnEntry* MoleSvnAddon::IsInRepository(const entry_ref& e)
@@ -356,7 +292,7 @@ string MoleSvnAddon::GetEntryNameList() const
 	return strRes;
 }
 
-const hash_map<entry_ref, SvnEntry*, MoleSvnAddon::hashEntryRef, MoleSvnAddon::eqEntryRef>& MoleSvnAddon::GetSvnEntries() const
+hash_map<entry_ref, SvnEntry*, MoleSvnAddon::hashEntryRef, MoleSvnAddon::eqEntryRef>& MoleSvnAddon::GetSvnEntries()
 {
 	return m_mapSvnEntries;
 }
@@ -366,57 +302,39 @@ const hash_map<entry_ref, SvnEntry*, MoleSvnAddon::hashEntryRef, MoleSvnAddon::e
 ///////////////////////////////////////////////////////////////////////////////
 bool AllInRepositoryFunc(entry_ref x)
 {
-	return MoleSvnAddon::GetInstance()->GetSvnEntries().find(x) != MoleSvnAddon::GetInstance()->GetSvnEntries().end(); 
+	// Check if the file is in the svn entries
+	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "AllInRepositoryFunc : look for entry %s", x.name));	
+	hash_map<entry_ref, SvnEntry*, MoleSvnAddon::hashEntryRef, MoleSvnAddon::eqEntryRef>::const_iterator ite = MoleSvnAddon::GetInstance()->GetSvnEntries().find(x);
+	if(ite == MoleSvnAddon::GetInstance()->GetSvnEntries().end())
+	{
+		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "AllInRepositoryFunc : entry %s not found ", x.name));	
+		return false;
+	}
+	
+	SvnEntry::Status status = (*ite).second->GetStatus();
+	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "AllInRepositoryFunc : entry status %s", (*ite).second->GetStatusString().c_str() ));	
+	// Check the status of the entry
+	return (   (status != SvnEntry::NonVersioned) 
+	        && (status != SvnEntry::Added)
+	        && (status != SvnEntry::Undefined) );
+}
+
+bool AllFilesFunc(entry_ref x)
+{
+	BDirectory dir(&x);
+	return (dir.InitCheck() != B_OK);
+}
+
+bool AllDirectoriesFunc(entry_ref x)
+{
+	BDirectory dir(&x);
+	return (dir.InitCheck() == B_OK);
 }
 
 BPopUpMenu* MoleSvnAddon::CreateMenu()
 {
 	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
-	
-/*
-	bool bHasRepo = HasRepository(BDirectory(&m_CurrentDirectory));
-	bool bHasSelectedFiles = m_lstEntry.size();
 
-	// Create the menu
-	BPopUpMenu* pMenu = new BPopUpMenu("menu");
-	if(!bHasRepo)
-	{
-		pMenu->AddItem(new IconMenuItem(new Checkout()));
-		pMenu->AddSeparatorItem();
-	}
-	if(bHasSelectedFiles || bHasRepo)
-	{
-		pMenu->AddItem(new IconMenuItem(new Update()));
-		pMenu->AddItem(new IconMenuItem(new Commit()));
-		pMenu->AddSeparatorItem();
-	}
-	
-	if(bHasRepo && bHasSelectedFiles)
-	{
-		pMenu->AddItem(new IconMenuItem(new Add()));
-		pMenu->AddItem(new IconMenuItem(new Delete()));
-		pMenu->AddItem(new IconMenuItem(new Revert()));	
-		// if the user has selected only one file
-		if(m_lstEntry.size() == 1)
-			pMenu->AddItem(new IconMenuItem(new Rename()));	
-		pMenu->AddSeparatorItem();
-	}
-			
-	if(bHasSelectedFiles)
-	{
-		pMenu->AddItem(new IconMenuItem(new Cleanup()));
-		pMenu->AddItem(new IconMenuItem(new Resolved()));	
-		pMenu->AddSeparatorItem();
-	}
-	
-	if( (!bHasRepo && bHasSelectedFiles) || bHasRepo)
-	{
-		pMenu->AddItem(new IconMenuItem(new Status()));
-		pMenu->AddSeparatorItem();
-	}
-	
-	pMenu->AddItem(new IconMenuItem(new About()));
-*/
 	bool bCurDirHasRepo = HasRepository(BDirectory(&m_CurrentDirectory));
 	bool bHasSelectedFiles = m_lstEntry.size();
 	unsigned int nSelectedFilesCount = m_lstEntry.size();
@@ -425,19 +343,33 @@ BPopUpMenu* MoleSvnAddon::CreateMenu()
 	count_if(m_lstEntry.begin(), m_lstEntry.end(), AllInRepositoryFunc, nSize);
 	bool bAllInRepository = (nSize == 0) ? false : (nSize == nSelectedFilesCount);
 	
+	nSize = 0;
+	count_if(m_lstEntry.begin(), m_lstEntry.end(), AllFilesFunc, nSize);
+	bool bAllFiles = (nSize == 0) ? false : (nSize == nSelectedFilesCount);
 
+	nSize = 0;
+	count_if(m_lstEntry.begin(), m_lstEntry.end(), AllDirectoriesFunc, nSize);
+	bool bAllDirectories = (nSize == 0) ? false : (nSize == nSelectedFilesCount);
+	
+	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "bCurDirHasRepo = %d", bCurDirHasRepo));
+	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "bHasSelectedFiles = %d", bHasSelectedFiles));
+	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "bAllInRepository = %d", bAllInRepository));
+	
 	// Create the menu
 	BPopUpMenu* pMenu = new BPopUpMenu("menu");
-	if(!bCurDirHasRepo && (nSelectedFilesCount <= 1) && !bAllInRepository )
+	if(!bCurDirHasRepo && (nSelectedFilesCount <= 1) && !bAllInRepository && !bAllFiles )
 	{
 		pMenu->AddItem(new IconMenuItem(new Checkout()));
-		//pMenu->AddItem(new IconMenuItem(new Export()));
-		//pMenu->AddItem(new IconMenuItem(new Import()));
+		if(nSelectedFilesCount == 1)
+		{
+			//pMenu->AddItem(new IconMenuItem(new Export()));
+			//pMenu->AddItem(new IconMenuItem(new Import()));
+		}
 		//pMenu->AddItem(new IconMenuItem(new CreateRepositoryHere()));
 		pMenu->AddSeparatorItem();
 	}
 	
-	if( bCurDirHasRepo || bAllInRepository )
+	if( bAllInRepository || (bCurDirHasRepo && !bHasSelectedFiles))
 	{
 		pMenu->AddItem(new IconMenuItem(new Update()));
 		pMenu->AddItem(new IconMenuItem(new Commit()));
@@ -475,7 +407,7 @@ BPopUpMenu* MoleSvnAddon::CreateMenu()
 	if( bHasSelectedFiles && bAllInRepository )
 	{
 		pMenu->AddItem(new IconMenuItem(new Cleanup()));
-		if( nSelectedFilesCount == 1 )
+		if( bCurDirHasRepo && nSelectedFilesCount == 1 )
 			pMenu->AddItem(new IconMenuItem(new Resolved()));	
 		pMenu->AddSeparatorItem();
 	}
@@ -546,20 +478,24 @@ BEntry MoleSvnAddon::GetEntriesEntry(const BDirectory& dir)
 	BEntry SvnEntry;
 	if(dir.FindEntry(".svn", &SvnEntry) != B_OK)
 	{
+#if defined(_DEBUG_)	
 		BEntry tmpEntry;
 		dir.GetEntry(&tmpEntry);
 		char tmp[B_FILE_NAME_LENGTH];
 		tmpEntry.GetName(tmp);
 		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Directory %s doesn't contain svn directory", tmp));
+#endif //_DEBUG_		
 		return entry;
 	}
 	
 	BDirectory svnDir(&SvnEntry);
 	if(svnDir.InitCheck() != B_OK)
 	{
+#if defined(_DEBUG_)	
 		char tmp[B_FILE_NAME_LENGTH];
 		SvnEntry.GetName(tmp);
 		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Invalid svn entry_ref = %s", tmp));
+#endif //_DEBUG_		
 		return entry;
 	}
 	
@@ -572,4 +508,221 @@ BEntry MoleSvnAddon::GetEntriesEntry(const BDirectory& dir)
 	
 	return entry;		
 }
+
+#define RETRIEVE_INFO(str, attribut) \
+	string str; \
+	const char* p##str = attribut; \
+	if(p##str) \
+		str.assign(p##str); \
+
+void MoleSvnAddon::LoadEntriesFile(const BDirectory& dir, 
+								   hash_map<entry_ref, SvnEntry*, hashEntryRef, eqEntryRef> &hashEntriesMap)
+{
+	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
+	
+	// Check if the svn entries file exists
+	BEntry entry(GetEntriesEntry(dir));
+	if(entry.InitCheck() != B_OK)
+		return;
+
+	// Load the XML file	
+	BPath path;
+	entry.GetPath(&path);
+	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Loading file = %s", path.Path()));
+	TiXmlDocument doc( path.Path() );
+	doc.LoadFile();	
+	if ( doc.Error() && doc.ErrorId() == TiXmlBase::TIXML_ERROR_OPENING_FILE ) 
+	{
+		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "File not found = %s", path.Path()));
+		return;
+	}
+	else
+	{
+		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "File is valid = %s", path.Path()));
+
+		// Now, we can extract infos
+		TiXmlElement* pRoot = doc.RootElement();
+		if(!pRoot)
+		{
+			TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Bad XML format of the file %s", path.Path()));
+			return;
+		}
+			
+		TiXmlElement* pElt = pRoot->FirstChildElement();
+		while(pElt)
+		{
+			// Retrieve common infos
+			RETRIEVE_INFO(strName, pElt->Attribute("name"));
+			RETRIEVE_INFO(strKind, pElt->Attribute("kind"));
+
+			//TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Element = %s  name=%s ", pElt->Value(), strName.c_str()));
+			
+			SvnEntry* pEntry = NULL;
+			entry_ref ertmp;
+			
+			// Check the type of the XML element
+			if(strKind == string("file"))
+			{
+				// Retrieve entry_ref from the name
+				BEntry entrytmp(&dir, strName.c_str());
+				entrytmp.GetRef(&ertmp);
+				
+				// Retrieve infos about the file
+				RETRIEVE_INFO(strCommittedRev, pElt->Attribute("committed-rev"));
+				RETRIEVE_INFO(strCommittedDate, pElt->Attribute("committed-date"));
+				
+				if(strName.size() == 0)
+				{
+					// it's not a file, these is infos about the current directory
+					//string strUrl(pElt->Attribute("url"));
+					//string strUuid(pElt->Attribute("uuid"));
+					//string strRevision(pElt->Attribute("revision"));
+					//string strLastAuthor(pElt->Attribute("last-author"));
+					RETRIEVE_INFO(strUrl, pElt->Attribute("url"));
+					RETRIEVE_INFO(strUuid, pElt->Attribute("uuid"));
+					RETRIEVE_INFO(strRevision, pElt->Attribute("revision"));
+					RETRIEVE_INFO(strLastAuthor, pElt->Attribute("last-author"));
+				}
+				else
+				{
+					//string strTextTime(pElt->Attribute("text-time"));
+					//string strChecksum(pElt->Attribute("checksum"));
+					RETRIEVE_INFO(strTextTime, pElt->Attribute("text-time"));
+					RETRIEVE_INFO(strChecksum, pElt->Attribute("checksum"));										
+					RETRIEVE_INFO(strPropTime, pElt->Attribute("prop-time"));										
+					RETRIEVE_INFO(strLastAuthor, pElt->Attribute("last-author"));
+					RETRIEVE_INFO(strSchedule, pElt->Attribute("schedule"));
+				
+				
+					BPath filePath(&entrytmp);
+					//SvnFileEntry* pFileEntry = new SvnFileEntry(strName);
+					SvnFileEntry* pFileEntry = new SvnFileEntry(filePath);
+					//pFileEntry->SetCommittedRevision(strCommittedRev);
+					pFileEntry->SetStatus(SvnEntry::Modified);
+					pFileEntry->SetLastAuthor(strLastAuthor);
+					pFileEntry->SetSchedule(strSchedule);
+					pEntry = pFileEntry;
+					TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "File entry added = %s", strName.c_str()));
+				}
+			}
+			else // dir
+			{
+				if(strName.size())
+				{
+					// Retrieve entry_ref from the name
+					BDirectory dirtmp(&dir, strName.c_str());				
+					BEntry entrytmp;
+					dirtmp.GetEntry(&entrytmp);
+					entrytmp.GetRef(&ertmp);
+			
+					BPath dirPath(&entrytmp);
+					//pEntry = new SvnDirEntry(strName);
+					pEntry = new SvnDirEntry(dirPath);
+					pEntry->SetStatus(SvnEntry::Unmodified);
+					TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Dir entry added = %s", strName.c_str()));
+				}
+			}
+		
+			// Add entry to the map
+			if(pEntry)
+			{
+				hashEntriesMap[ertmp] = pEntry;
+			}
+			
+			// Next element
+			pElt = pElt->NextSiblingElement();
+		}
+	}
+	
+	// Close the file
+	// TinyXML ???
+}
+
+void MoleSvnAddon::GetEntriesList(const BDirectory& dir, 
+								  list<entry_ref>& lstEntry, 
+								  list<BDirectory>& lstSubdirectories)
+{
+	entry_ref direntry;
+	BDirectory dirtmp(dir);
+	while(dirtmp.GetNextRef(&direntry) != B_ENTRY_NOT_FOUND)
+	{
+		BEntry entry(&direntry);
+		BPath path;
+		entry.GetPath(&path);
+		
+		// Check if it's .svn
+		if(strcmp(path.Leaf(), ".svn") != 0)
+		{
+			lstEntry.push_back(direntry);
+			
+			// Check if the entry is a directory
+			BDirectory subdir(&direntry);
+			if(subdir.InitCheck() == B_OK)
+			{
+				lstSubdirectories.push_back(subdir);
+			}
+		}
+	}
+}
+
+void MoleSvnAddon::UpdateEntriesFromList(hash_map<entry_ref, SvnEntry*, hashEntryRef, eqEntryRef> &hashEntriesMap,
+										 const list<entry_ref>& lstEntry)
+{
+	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
+	
+	list<entry_ref>::const_iterator ite = lstEntry.begin();
+	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Size = %d", lstEntry.size()));
+	hash_map<entry_ref, SvnEntry*, hashEntryRef, eqEntryRef>::const_iterator elt;
+	while(ite != lstEntry.end())
+	{
+		elt = hashEntriesMap.find(*ite);
+		SvnEntry* pEntry;
+		BDirectory dir(&*ite);
+		TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Look = %s", (*ite).name));
+		if(elt == hashEntriesMap.end())
+		{
+			// We must add a new entry, with nonversioned status
+			BPath path(&(*ite));
+			if(dir.InitCheck() == B_OK)
+			{
+				pEntry = new SvnDirEntry(path);
+			}
+			else
+			{
+				pEntry = new SvnFileEntry(path);
+			}
+			pEntry->SetStatus(SvnEntry::NonVersioned);
+			hashEntriesMap[*ite] = pEntry;
+			TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Add nonversionned element = %s", (*ite).name));
+		}
+		else
+		{
+			// We check if the file has been modified since the last commit
+			if(dir.InitCheck() != B_OK)
+			{
+				hashEntriesMap[*ite]->SetStatus(SvnEntry::Modified);
+			}
+		}
+		
+		++ite;
+	}	
+}
+/*
+void MoleSvnAddon::AddEntry(const entry_ref& ref, SvnEntry* entry, BLooper* looper)
+{
+	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
+	
+	m_mapSvnEntries[ref] = entry;
+
+	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Add entry = %s", entry->GetRelativePath().c_str()));
+	
+	if(looper)
+	{
+		BMessage msg(ENTRY_ADDED);
+		msg.AddPointer("ref", entry);
+		looper->PostMessage(&msg);
+	}
+}
+*/
+
 

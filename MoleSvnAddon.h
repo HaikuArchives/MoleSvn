@@ -15,6 +15,9 @@
 #include "Utils/MoleSvnResources.h"
 #include "Svn/SvnEntry.h"
 
+#define ENTRY_ADDED				'EADD'
+#define ENTRY_STATUS_CHANGED	'ESCH'
+
 class MoleSvnAddon
 {
 private:
@@ -59,13 +62,10 @@ public:
 	bool HasRepository(const BDirectory& dir);
 		// Description : returns True if the directory dir contains a svn repository (.svn directory)
 
-	bool LoadRepository(const BDirectory& dir, BLooper* pLooper = NULL);
-		// Description : load the repository of the directory dir
-		
 	SvnEntry* IsInRepository(const entry_ref& e);
 		// Descrption : return a SvnEntry pointer if the entry ref is in the repository,
 		//              null otherwise
-		
+
 	void ShowMenu(BPoint point);
 		// Description : show the menu
 		// Remarks     : the content of the menu depends of the files selected by the user
@@ -89,7 +89,7 @@ public:
 	std::string GetEntryNameList() const;
 		// Description : returns the list name of all selected entries by the user
 		
-	const std::hash_map<entry_ref, SvnEntry*, hashEntryRef, eqEntryRef>& GetSvnEntries() const;
+	std::hash_map<entry_ref, SvnEntry*, hashEntryRef, eqEntryRef>& GetSvnEntries();
 		// Description : return the hashmap of the entries infos
 private:
 	// -- UI ------------------------------------------------------------------
@@ -104,11 +104,30 @@ private:
 	std::string GetAddonFilename();
 		// Description : returns the addon filename
 		// Remarks     : we must have this function to open ressource in the addon file, and the
-		//               user can change the addon name (like for shortcut)
+		//               user can change the addon name (shortcut for example)
 	
 	BEntry GetEntriesEntry(const BDirectory& dir);
-		// Description : return the BEntry of the file "entries" in tue svn subdirectory if dir
+		// Description : return the BEntry of the file "entries" in the svn subdirectory of dir
+		//               if dir is not valid, the returned BEntry is not valid (InitCheck returns B_NO_INIT)
+public:	
+	void LoadEntriesFile(const BDirectory& dir, 
+					     std::hash_map<entry_ref, SvnEntry*, hashEntryRef, eqEntryRef> &hashEntriesMap);
+		// Description : Load the content of the entries file in the subdir of "dir".
+		//               The content is stored in a hashmap
 	
+	void GetEntriesList(const BDirectory& dir, 
+						std::list<entry_ref>& lstEntry,
+						std::list<BDirectory>& lstSubdirectories);
+		// Description : create a list of all entry_ref in the directory "dir"
+		//               lstSubdirectories will contain the list of subdirectories of "dir"
+		
+	void UpdateEntriesFromList(std::hash_map<entry_ref, SvnEntry*, hashEntryRef, eqEntryRef> &hashEntriesMap,
+							   const std::list<entry_ref>& lstEntry);
+
+
+	//void AddEntry(SvnEntry* entry, BLooper* looper = NULL);
+	
+private:	
 	entry_ref m_CurrentDirectory;
 		// Description : entry_ref from where the user launchs the addon
 		// Init        : By cons

@@ -225,7 +225,13 @@ void CheckoutWindow::CreateView()
 	BRect CheckoutDirFrame(g_fControlSpace, CheckoutDirStringViewFrame.bottom + 5, 
 	                       fRepositoryBBoxWidth - g_fControlSpace - (fSpace + fButtonWidth), 
 	                       0);
-	BPath path(MoleSvnAddon::GetInstance()->GetCurrentDirectory()); 
+	BPath path(MoleSvnAddon::GetInstance()->GetCurrentDirectory());
+	if(MoleSvnAddon::GetInstance()->GetSelectedEntryList().size() == 1)
+	{
+		// Checkout in the selected dir
+		path.Append(MoleSvnAddon::GetInstance()->GetSelectedEntryList().front().name);
+	}
+	
 	m_pCheckoutDirectory = new BTextControl(CheckoutDirFrame,
 						    		        "CheckoutDirTextControl",
 											"Checkout directory",

@@ -25,14 +25,14 @@ public:
 	};
 
 	// -- Life-cycle ----------------------------------------------------------
-	SvnFileEntry(std::string strName);
+	SvnFileEntry(const BPath& path);
 		// Description : constructor
 		
 	~SvnFileEntry();
 		// Description : destructor
 		
 	// -- Hook functions ------------------------------------------------------
-	bool IsFile();
+	bool IsFile() const;
 
 	// -- Accessors -----------------------------------------------------------
 	unsigned int GetCommittedRevision() const;
@@ -63,7 +63,7 @@ private:
 		// Init        : empty by cons
 		
 	SvnFileEntry::Schedule m_Schedule;
-		// Descirption : schedule of the file for the next commit (add, delete, ...)
+		// Description : schedule of the file for the next commit (add, delete, ...)
 		// Init        : None
 };
 

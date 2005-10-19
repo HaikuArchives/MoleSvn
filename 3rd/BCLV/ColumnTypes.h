@@ -88,6 +88,7 @@ class BStringField : public BField
 {
 	public:
 									BStringField		(const char* string);
+				virtual				~BStringField       (){};
 
 				void				SetString			(const char* string);
 				const char*			String				() const;
@@ -107,13 +108,14 @@ class BStringField : public BField
 
 class BStringColumn : public BTitledColumn
 {
-	public:
+public:
 							BStringColumn		(const char *title,
 												 float width,
 												 float maxWidth,
 												 float minWidth,
 												 uint32 truncate,
 												 alignment align = B_ALIGN_LEFT);
+	    virtual				~BStringColumn      (){};
 		virtual void		DrawField			(BField* field,
 												 BRect rect,
 												 BView* parent);
@@ -122,10 +124,9 @@ class BStringColumn : public BTitledColumn
 		virtual	bool		AcceptsField        (const BField* field) const;
 
 
-	private:
+protected:
 		uint32				fTruncate;
 };
-
 
 //=====================================================================
 // Field and column classes for dates.

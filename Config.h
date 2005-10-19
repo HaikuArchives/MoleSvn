@@ -15,8 +15,12 @@
 #include <SupportKit.h>
 #include <StorageKit.h>
 
+#define _DEBUG_	1	// define it for debug compilation
+
+#if defined(_DEBUG_)
 #define CLUE	// define it for debug session with clue tool
 #include "Utils/Clue.h"
+#endif //_DEBUG_
 
 #include "Utils/Exception.h"
 #include "Utils/Utils.h"

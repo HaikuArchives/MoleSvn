@@ -17,14 +17,14 @@ class SvnDirEntry : public SvnEntry
 {
 public:
 	// -- Life-cycle ----------------------------------------------------------
-	SvnDirEntry(std::string strName);
+	SvnDirEntry(const BPath& path);
 		// Description : constructor
 		
 	~SvnDirEntry();
 		// Description : destructor
 		
 	// -- Hook functions ------------------------------------------------------
-	bool IsFile();
+	bool IsFile() const;
 	
 private:
 

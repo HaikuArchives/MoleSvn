@@ -27,7 +27,7 @@ void process_refs(entry_ref dir_ref, BMessage *msg, void *)
 		entry_ref file_ref; 
 		list<entry_ref> lstEntry;	
 		char name[B_FILE_NAME_LENGTH]; 
-		for (nRefs=0; msg->FindRef("refs", nRefs, &file_ref) == B_NO_ERROR; nRefs++) 
+		for (nRefs=0; msg->FindRef("refs", nRefs, &file_ref) == B_NO_ERROR; ++nRefs)
 		{
 			// Check if the entry is a .svn directory
 			BEntry svnentry(&file_ref);

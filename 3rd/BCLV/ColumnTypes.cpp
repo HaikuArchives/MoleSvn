@@ -45,6 +45,9 @@ All rights reserved.
 
 #include "ColumnTypes.h"
 #include <stdio.h>
+#include <string>
+#include <algorithm>
+#include <function.h>
 #include <View.h>
 #include <parsedate.h>
 
@@ -249,7 +252,6 @@ bool BStringColumn::AcceptsField(const BField *field) const
 {
 	return static_cast<bool>(dynamic_cast<const BStringField*>(field));
 }
-
 
 // #pragma mark -
 

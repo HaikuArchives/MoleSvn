@@ -1661,11 +1661,13 @@ TitleView::~TitleView()
 	delete fColumnPop;
 	fColumnPop = NULL;
 	
+#if DOUBLE_BUFFERED_COLUMN_RESIZE
 	fDrawBuffer->Lock();
 	fDrawBufferView->RemoveSelf();
 	fDrawBuffer->Unlock();
 	delete fDrawBufferView;
 	delete fDrawBuffer;
+#endif	
 	delete fUpSortArrow;
 	delete fDownSortArrow;
 
@@ -2458,12 +2460,13 @@ OutlineView::OutlineView(BRect rect, BList *visibleColumns, BList *sortColumns,
 
 OutlineView::~OutlineView()
 {
+#if DOUBLE_BUFFERED_COLUMN_RESIZE
 	fDrawBuffer->Lock();
 	fDrawBufferView->RemoveSelf();
 	fDrawBuffer->Unlock();
 	delete fDrawBufferView;
 	delete fDrawBuffer;
-
+#endif
 	Clear();
 }
 
@@ -2657,7 +2660,8 @@ void OutlineView::RedrawColumn(BColumn *column, float leftEdge, bool isFirstColu
 					ConstrainClippingRegion(&clipRegion);
 					PushState();
 		#endif
-					SetHighColor(fColorList[B_TEXT_COLOR]);
+					//SetHighColor(fColorList[B_TEXT_COLOR]);
+					SetHighColor(fMasterView->Color(B_COLOR_TEXT));
 					float baseline = floor(destRect.top + fh.ascent
 											+ (destRect.Height()+1-(fh.ascent+fh.descent))/2);
 					MovePenTo(destRect.left + 8, baseline);
@@ -2942,7 +2946,10 @@ void OutlineView::MouseDown(BPoint position)
 						continue;
 					if((MAX(kLeftMargin, fMasterView->LatchWidth())+x)+new_column->Width() >= position.x) {
 						if(new_column->WantsEvents()) {
-							new_field = row->GetField(c);
+							// BUG : Kor
+							//new_field = row->GetField(c);	
+							new_field = row->GetField(new_column->fFieldID);
+							// End BUG
 							new_row = row;
 							FindRect(new_row,&new_rect);
 							new_rect.left = MAX(kLeftMargin, fMasterView->LatchWidth()) + x;
@@ -3082,7 +3089,10 @@ void OutlineView::MouseMoved(BPoint position, uint32 /*transit*/, const BMessage
 						continue;
 					if((MAX(kLeftMargin, fMasterView->LatchWidth())+x)+new_column->Width() > position.x) {
 						if(new_column->WantsEvents()) {
-							new_field = row->GetField(c);
+							// BUG : Kor
+							//new_field = row->GetField(c);	
+							new_field = row->GetField(new_column->fFieldID);
+							// End BUG
 							new_row = row;
 							FindRect(new_row,&new_rect);
 							new_rect.left = MAX(kLeftMargin, fMasterView->LatchWidth()) + x;

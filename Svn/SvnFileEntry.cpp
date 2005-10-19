@@ -17,13 +17,13 @@ using namespace boost;
 ///////////////////////////////////////////////////////////////////////////////
 // -- Life-cycle
 ///////////////////////////////////////////////////////////////////////////////
-SvnFileEntry::SvnFileEntry(std::string strName)
-:SvnEntry(strName),
+SvnFileEntry::SvnFileEntry(const BPath& path)
+:SvnEntry(path),
  m_nCommittedRevision(0),
  m_strLastAuthor(),
  m_Schedule(SvnFileEntry::None)
 {
-	TRACE_METHOD ((CC_APPLICATION, REPORT_METHOD));
+
 }
 
 SvnFileEntry::~SvnFileEntry()
@@ -34,7 +34,7 @@ SvnFileEntry::~SvnFileEntry()
 ///////////////////////////////////////////////////////////////////////////////
 // -- Hook functions
 ///////////////////////////////////////////////////////////////////////////////
-bool SvnFileEntry::IsFile()
+bool SvnFileEntry::IsFile() const
 {
 	return true;	
 }

@@ -11,14 +11,10 @@
 
 #include "../Config.h"
 #include "../Svn/SvnCommands.h"
-/*
-#	if defined(B_ZETA_VERSION)
-#		include <interface/ColumnTypes.h>
-#	else // BEOS
-#		include <experimental/ColumnTypes.h>
-		using namespace BExperimental;
-#	endif // ZETA
-*/
+#include "../Svn/SvnEntry.h"
+
+
+#define BCLV_COMMIT 1
 
 #include "../3rd/BCLV/ColumnTypes.h"
 
@@ -43,11 +39,12 @@ private:
 	void CreateView();
 		// Description : build UI
 		
-	void AddItem(const string& strText);
+	void AddItem(const SvnEntry* pEntry);
 		// Description : add a new item to the CLV
 		
 	Commit* 	  		m_pCmd;
 	BColumnListView*  	m_pFilesToCommitView;
+
 	BTextView* 	  		m_pTextView;
 	BTextControl* 		m_pLogin;
 	BTextControl* 		m_pPassword;
