@@ -8,11 +8,12 @@
 
 #include "SvnFileEntry.h"
 
-#define BOOST_NO_STRINGSTREAM
-#include <boost/lexical_cast.hpp>
+//#define BOOST_NO_STRINGSTREAM
+//#include <boost/lexical_cast.hpp>
+#include <stdlib.h>	// atoi
 
 using namespace std;
-using namespace boost;
+//using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // -- Life-cycle
@@ -51,7 +52,8 @@ void SvnFileEntry::SetCommittedRevision(const std::string& strRevision)
 {
 	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Revision = %s", strRevision.c_str()));
 
-	m_nCommittedRevision = lexical_cast<int>(strRevision);
+//	m_nCommittedRevision = lexical_cast<int>(strRevision);
+	m_nCommittedRevision = atoi(strRevision.c_str());
 	
 	TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Revision = %d", m_nCommittedRevision));
 }

@@ -28,7 +28,19 @@ APP_MIME_SIG =
 #	means this Makefile will not work correctly if two source files with the
 #	same name (source.c or source.cpp) are included from different directories.
 #	Also note that spaces in folder names do not work well with this Makefile.
-SRCS =  main.cpp MoleSvnAddon.cpp MoleSvnResources.cpp Utils.cpp EntryTypes.cpp ColoredStringTypes.cpp CheckoutWindow.cpp CommitWindow.cpp IconMenuItem.cpp MenuItem.cpp RenameWindow.cpp ResultsWindow.cpp About.cpp Add.cpp Blame.cpp Checkout.cpp Cleanup.cpp Commit.cpp Delete.cpp Rename.cpp Resolved.cpp Revert.cpp Status.cpp SvnCommands.cpp SvnDirEntry.cpp SvnEntry.cpp SvnFileEntry.cpp Update.cpp tinystr.cpp tinyxml.cpp tinyxmlerror.cpp tinyxmlparser.cpp ColumnListView.cpp ColumnTypes.cpp ColorTools.cpp
+SRCS =	main.cpp MoleSvnAddon.cpp Utils.cpp ColoredStringTypes.cpp \
+		CommitWindow.cpp IconMenuItem.cpp MenuItem.cpp RenameWindow.cpp \
+		ResultsWindow.cpp Add.cpp Blame.cpp Checkout.cpp Cleanup.cpp \
+		Commit.cpp Delete.cpp Rename.cpp Resolved.cpp Revert.cpp Status.cpp \
+		SvnCommands.cpp SvnDirEntry.cpp SvnEntry.cpp SvnFileEntry.cpp \
+		Update.cpp tinyxml.cpp tinyxmlerror.cpp tinyxmlparser.cpp \
+		ColumnTypes.cpp ColorTools.cpp \
+		Utils/MoleSvnResources.cpp \
+		UI/BCLV/EntryTypes.cpp \
+		UI/CheckoutWindow.cpp \
+		Svn/About.cpp \
+		3rd/TinyXML/tinystr.cpp \
+		3rd/BCLV/ColumnListView.cpp
 
 #	Specify the resource definition files to use. Full or relative paths can be
 #	used.
@@ -54,7 +66,7 @@ RSRCS =  MoleSVN.rsrc
 #	- 	if your library does not follow the standard library naming scheme,
 #		you need to specify the path to the library and it's name.
 #		(e.g. for mylib.a, specify "mylib.a" or "path/mylib.a")
-LIBS =  /boot/system/lib/libbe.so /boot/system/lib/libtracker.so /boot/system/lib/libroot.so /boot/system/lib/libstdc++.r4.so
+LIBS =  be tracker $(STDCPPLIBS)
 
 #	Specify additional paths to directories following the standard libXXX.so
 #	or libXXX.a naming scheme. You can specify full paths or paths relative
@@ -66,12 +78,12 @@ LIBPATHS =
 #	Additional paths to look for system headers. These use the form
 #	"#include <header>". Directories that contain the files in SRCS are
 #	NOT auto-included here.
-SYSTEM_INCLUDE_PATHS =  /boot/develop/headers/be /boot/develop/headers/posix /boot/develop/lib /boot/beos/system/lib
+SYSTEM_INCLUDE_PATHS = 
 
 #	Additional paths paths to look for local headers. These use the form
 #	#include "header". Directories that contain the files in SRCS are
 #	automatically included.
-LOCAL_INCLUDE_PATHS =  ../../config/lib
+LOCAL_INCLUDE_PATHS = Svn UI Utils 3rd/TinyXML 3rd/BCLV
 
 #	Specify the level of optimization that you want. Specify either NONE (O0),
 #	SOME (O1), FULL (O2), or leave blank (for the default optimization level).
@@ -104,7 +116,7 @@ SYMBOLS :=
 DEBUGGER := 
 
 #	Specify any additional compiler flags to be used.
-COMPILER_FLAGS = -Woverloaded-virtual -funsigned-bitfields -Wwrite-strings -ftemplate-depth-20 -I/boot/home/config/include/stlport -I%include
+COMPILER_FLAGS = -Woverloaded-virtual -funsigned-bitfields -Wwrite-strings -ftemplate-depth-20
 
 #	Specify any additional linker flags to be used.
 LINKER_FLAGS = 

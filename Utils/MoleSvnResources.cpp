@@ -44,7 +44,7 @@ void MoleSvnResources::LoadIcon(type_code type, MoleSvnIcons iconId, BBitmap** p
 	if(!m_pResources->HasResource(type, iconId))
 	//if(!m_pResources->HasResource('BBMP', iconId))
 	{
-		throw ResourceNotFoundException(iconId);
+//		throw ResourceNotFoundException(iconId);
 	}
 
 	// Load icons from ressource file

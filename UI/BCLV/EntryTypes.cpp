@@ -50,7 +50,7 @@ BEntryColumn::BEntryColumn(const char *title, float width, float maxWidth, float
 	// Empty	
 }
 
-#define CLUE	// define it for debug session with clue tool
+//#define CLUE	// define it for debug session with clue tool
 #include "../../Utils/Clue.h"
 
 
