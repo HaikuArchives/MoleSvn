@@ -7,14 +7,17 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "CheckoutWindow.h"
+
+#include <stdlib.h>	// atoi
+
 #include "../MoleSvnAddon.h"
 #include "MessageCommands.h"
 #include "ResultsWindow.h"
-#define BOOST_NO_STRINGSTREAM
-#include <boost/lexical_cast.hpp>
+//#define BOOST_NO_STRINGSTREAM
+//#include <boost/lexical_cast.hpp>
 
 using namespace std;
-using namespace boost;
+//using namespace boost;
 
 #define CHECKOUT_OK             	'C_OK'
 #define CHECKOUT_CANCEL         	'CCAN'
@@ -384,7 +387,7 @@ bool CheckoutWindow::CheckParameters()
 		// Retrieve the revision number
 		try
 		{
-			int nRevision = lexical_cast<int>(m_pRevision->Text());
+			int nRevision = atoi(m_pRevision->Text());
 			TRACE_SIMPLE ((CC_APPLICATION, CR_INFO, "Revision number : %d", nRevision));
 			
 			if(nRevision <= 0)

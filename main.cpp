@@ -10,7 +10,7 @@
 #include <string.h> 
 #include <list>
 
-#include <be/add-ons/tracker/TrackerAddon.h>
+#include <add-ons/tracker/TrackerAddOn.h>
 #include "Config.h"
 #include "MoleSvnAddon.h"
 

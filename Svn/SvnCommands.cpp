@@ -10,7 +10,7 @@
 #include <string.h> 
 #include <fstream.h> 
 #include <unistd.h>
-#include <net/socket.h>
+#include <sys/socket.h>
 
 using namespace std;
 

@@ -18,7 +18,7 @@
 #define _DEBUG_	1	// define it for debug compilation
 
 #if defined(_DEBUG_)
-#define CLUE	// define it for debug session with clue tool
+//#define CLUE	// define it for debug session with clue tool
 #include "Utils/Clue.h"
 #endif //_DEBUG_
 
